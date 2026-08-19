@@ -98,6 +98,24 @@ tr.off td:first-child{color:var(--danger)}
 .banner button.x{background:transparent;padding:7px 4px;opacity:.7}
 .stat{display:inline-block;margin-right:20px}
 .stat b{display:block;font-size:22px;font-weight:700}
+/* 總醫師輪值（上/下半月） */
+.half-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.half-box{border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center}
+.half-box .hlbl{font-size:12px;color:var(--muted)}
+.half-box .hcode{font-size:22px;font-weight:700;margin-top:4px;color:#fff;border-radius:8px;padding:4px 0}
+.half-box .hcode.plain{color:var(--ink);background:transparent;padding:4px 0}
+.half-box .hnote{font-size:12px;color:var(--muted);margin-top:4px}
+/* 月曆 */
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal .dow{font-size:11px;color:var(--muted);text-align:center;padding:2px 0 6px;font-weight:700}
+.cal .cell{min-height:52px;border-radius:8px;padding:3px;border:1px solid var(--line)}
+.cal .cell.empty{border-color:transparent}
+.cal .cell.off{background:var(--bg)}
+.cal .cell.today{border-color:var(--brand);border-width:2px}
+.cal .cell .dnum{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.cal .cell.today .dnum{color:var(--brand);font-weight:700}
+.cal .cell .chips{display:flex;flex-wrap:wrap;gap:2px;margin-top:2px}
+.cal .cell .chip{font-size:10px;padding:1px 4px;margin:0;line-height:1.5}
 .modal{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;z-index:100;align-items:flex-end;justify-content:center}
 .modal.on{display:flex}
 .sheet{background:var(--card);width:100%;max-width:520px;border-radius:16px 16px 0 0;padding:16px;
@@ -117,9 +135,9 @@ tr.off td:first-child{color:var(--danger)}
   </div>
   <nav id="tabs">
     <button data-p="today" aria-selected="true">今天</button>
-    <button data-p="mine"  aria-selected="false">我的班</button>
+    <button data-p="mine"  aria-selected="false">行事曆</button>
     <button data-p="all"   aria-selected="false">全月</button>
-    <button data-p="dir"   aria-selected="false">名冊</button>
+    <button data-p="dir"   aria-selected="false">通訊錄</button>
     <button data-p="io"    aria-selected="false">更新資料</button>
   </nav>
 </header>
@@ -152,9 +170,14 @@ tr.off td:first-child{color:var(--danger)}
       <h2>當日其他班別</h2>
       <div id="otherBox"></div>
     </div>
+    <div class="card">
+      <h2>心臟血管外科 CW 值班</h2>
+      <p class="muted" style="margin-top:0">跨科聯絡用，非本科排班，不列入通訊錄與下拉選單。</p>
+      <div id="cwBox"></div>
+    </div>
   </section>
 
-  <!-- ============ 我的班 ============ -->
+  <!-- ============ 行事曆 ============ -->
   <section class="panel" id="p-mine">
     <div id="mineBox"></div>
   </section>
@@ -175,26 +198,20 @@ tr.off td:first-child{color:var(--danger)}
     </div>
   </section>
 
-  <!-- ============ 名冊 ============ -->
+  <!-- ============ 通訊錄 ============ -->
   <section class="panel" id="p-dir">
     <div class="card">
       <div class="row" style="margin-bottom:10px">
         <input id="dirSearch" placeholder="搜尋姓名、醫師代號或 GSM" style="flex:1;min-width:160px">
       </div>
-      <h2>心臟內科值班表名冊</h2>
-      <p class="muted" style="margin-top:0">點任一列可複製該員的醫師代號與 GSM。★ 為總醫師。</p>
+      <h2>心臟內科通訊錄</h2>
+      <p class="muted" style="margin-top:0">點任一列可複製該員的醫師代號與 GSM。</p>
       <div class="scroll"><table id="dirTbl"></table></div>
-    </div>
-    <div class="card">
-      <h2>白天普通會診名冊</h2>
-      <p class="muted" style="margin-top:0">「可排」為該員原表註記的可排班星期。</p>
-      <div class="scroll"><table id="dirTbl2"></table></div>
     </div>
     <div class="card no-print">
       <h2>整批複製</h2>
       <div class="row">
-        <button class="btn ghost sm" id="btnCopyDuty">複製值班名冊</button>
-        <button class="btn ghost sm" id="btnCopyCons">複製會診名冊</button>
+        <button class="btn ghost sm" id="btnCopyDuty">複製通訊錄</button>
         <button class="btn ghost sm" id="btnCsvDir">下載 CSV</button>
       </div>
     </div>
@@ -305,6 +322,11 @@ tr.off td:first-child{color:var(--danger)}
      - 8/18 起的 A 班原判讀錯誤，已依使用者提供的姓氏序重寫：
        18 謝耀德、19 黃紹維、20 張仲銘、21 黃紹維、22 張仲銘、23 楊廣安、24 張仲銘、
        25 林昆緯、26 侯邦彥、27 黃紹維、28 張仲銘、29 黃紹維、30 張仲銘、31 謝耀德
+     - GSM 內科總值班表最右側 9 欄（黃敬夫／黃庭欣／黃鼎森／侯邦彥／林昆緯／楊廣安／
+       謝耀德／張仲銘／黃紹維）於 2026-08-18 依使用者提供的清晰照片全部逐格重新比對，
+       共修正 71 格（A、A1、A2、S、U、E、特休皆有誤讀，主因是這 9 欄本身很窄、且前
+       3 欄同姓「黃」，容易對錯欄位）。修正後以「每天心臟科 A 班全科只會有 1 人」這個
+       表格本身的邏輯規則做交叉驗證，31 天全數通過（無 0 人或 2 人以上同天值 A 班的情形）。
    ============================================================ */
 var MONTH_DATA = {
   meta: {
@@ -342,52 +364,133 @@ var MONTH_DATA = {
   /* 使用者指定的心臟科總醫師 */
   chiefs: ['黃鼎森','黃敬夫','侯邦彥','楊廣安','林昆緯','謝耀德','黃紹維','張仲銘'],
 
-  /* ---------- 值班表名冊（依表格欄位順序） ---------- */
+  /* ---------- 總醫師輪訓職務（來自 fellowcourse 檔案 2026-2027 分頁） ----------
+     半月為單位；只保留科內指示對應到姓名的 7 位總醫師（森/邦/昆/安/德/紹/仲），
+     聿、宏、斌三欄未提供姓名對照，不計入。
+     A-F 為該分頁的輪訓代碼，與心臟科 A/B/C 值班代碼是完全不同的兩套系統，
+     顯示時用不同配色避免混淆。 */
+  fellowRotation: {
+    codes: {
+      A:{label:'A',note:'急會診 / 急診清床 / cover普會',color:'#2563eb'},
+      B:{label:'B',note:'病房 / CCU / 行政 / pre-cath / 交接班',color:'#9333ea'},
+      C:{label:'C',note:'Cath',color:'#ea580c'},
+      D:{label:'D',note:'EP',color:'#0891b2'},
+      E:{label:'E',note:'Portable echo',color:'#16a34a'},
+      F:{label:'F',note:'普通會診（固定星期，依原表）',color:'#db2777'}
+    },
+    schedule: [
+      {ym:'2025-09', half:1, values:{"黃鼎森":"E", "侯邦彥":"C", "林昆緯":"A", "楊廣安":"D", "謝耀德":"C"}},
+      {ym:'2025-09', half:2, values:{"黃鼎森":"C", "侯邦彥":"D", "林昆緯":"E", "楊廣安":"C", "謝耀德":"C"}},
+      {ym:'2025-10', half:1, values:{"黃鼎森":"B", "侯邦彥":"C", "林昆緯":"D", "楊廣安":"E", "謝耀德":"A"}},
+      {ym:'2025-10', half:2, values:{"黃鼎森":"B", "侯邦彥":"C", "林昆緯":"C", "楊廣安":"C", "謝耀德":"D"}},
+      {ym:'2025-11', half:1, values:{"黃鼎森":"C", "侯邦彥":"E", "林昆緯":"D", "楊廣安":"B", "謝耀德":"A"}},
+      {ym:'2025-11', half:2, values:{"黃鼎森":"C", "侯邦彥":"C", "林昆緯":"E", "楊廣安":"B", "謝耀德":"D"}},
+      {ym:'2025-12', half:1, values:{"黃鼎森":"A", "侯邦彥":"C", "林昆緯":"D", "楊廣安":"E", "謝耀德":"C"}},
+      {ym:'2025-12', half:2, values:{"黃鼎森":"C", "侯邦彥":"D", "林昆緯":"C", "楊廣安":"A", "謝耀德":"C"}},
+      {ym:'2026-01', half:1, values:{"黃鼎森":"D", "侯邦彥":"C", "林昆緯":"B", "楊廣安":"A", "謝耀德":"E"}},
+      {ym:'2026-01', half:2, values:{"黃鼎森":"C", "侯邦彥":"E", "林昆緯":"B", "楊廣安":"D", "謝耀德":"A"}},
+      {ym:'2026-02', half:1, values:{"黃鼎森":"C", "侯邦彥":"B", "林昆緯":"D", "楊廣安":"A", "謝耀德":"E"}},
+      {ym:'2026-02', half:2, values:{"黃鼎森":"A", "侯邦彥":"B", "林昆緯":"C", "楊廣安":"E", "謝耀德":"C"}},
+      {ym:'2026-03', half:1, values:{"黃鼎森":"C", "侯邦彥":"C", "林昆緯":"A", "楊廣安":"特休", "謝耀德":"B"}},
+      {ym:'2026-03', half:2, values:{"黃鼎森":"C", "侯邦彥":"E", "林昆緯":"特休", "楊廣安":"A", "謝耀德":"B"}},
+      {ym:'2026-04', half:1, values:{"黃鼎森":"婚假", "侯邦彥":"A", "林昆緯":"B", "楊廣安":"D", "謝耀德":"C"}},
+      {ym:'2026-04', half:2, values:{"黃鼎森":"D", "侯邦彥":"C", "林昆緯":"B", "楊廣安":"C", "謝耀德":"A"}},
+      {ym:'2026-05', half:1, values:{"黃鼎森":"E", "侯邦彥":"C", "林昆緯":"D", "楊廣安":"B", "謝耀德":"特休"}},
+      {ym:'2026-05', half:2, values:{"黃鼎森":"D", "侯邦彥":"C", "林昆緯":"A", "楊廣安":"B", "謝耀德":"C"}},
+      {ym:'2026-06', half:1, values:{"黃鼎森":"E", "侯邦彥":"C", "林昆緯":"A", "楊廣安":"C", "謝耀德":"D"}},
+      {ym:'2026-06', half:2, values:{"黃鼎森":"C", "侯邦彥":"C", "林昆緯":"E", "楊廣安":"C", "謝耀德":"D"}},
+      {ym:'2026-07', half:1, values:{"黃鼎森":"特休", "侯邦彥":"B", "林昆緯":"C", "楊廣安":"D", "謝耀德":"A"}},
+      {ym:'2026-07', half:2, values:{"黃鼎森":"E", "侯邦彥":"B", "林昆緯":"C", "楊廣安":"D", "謝耀德":"C"}},
+      {ym:'2026-08', half:1, values:{"黃鼎森":"D", "侯邦彥":"特休", "林昆緯":"C", "楊廣安":"C", "謝耀德":"B", "黃紹維":"A", "張仲銘":"E"}},
+      {ym:'2026-08', half:2, values:{"黃鼎森":"E", "侯邦彥":"D", "林昆緯":"C", "楊廣安":"A", "謝耀德":"B", "黃紹維":"C", "張仲銘":"C"}},
+      {ym:'2026-09', half:1, values:{"侯邦彥":"C", "林昆緯":"A", "楊廣安":"B", "謝耀德":"E", "黃紹維":"D", "張仲銘":"C"}},
+      {ym:'2026-09', half:2, values:{"侯邦彥":"C", "林昆緯":"A", "楊廣安":"B", "謝耀德":"E", "黃紹維":"C", "張仲銘":"D"}},
+      {ym:'2026-10', half:1, values:{"侯邦彥":"C", "林昆緯":"D", "楊廣安":"E", "謝耀德":"C", "黃紹維":"B", "張仲銘":"A"}},
+      {ym:'2026-10', half:2, values:{"侯邦彥":"C", "林昆緯":"E", "楊廣安":"F", "謝耀德":"A", "黃紹維":"B", "張仲銘":"C"}},
+      {ym:'2026-11', half:1, values:{"侯邦彥":"特休", "林昆緯":"B", "楊廣安":"A", "謝耀德":"D", "黃紹維":"E", "張仲銘":"C"}},
+      {ym:'2026-11', half:2, values:{"侯邦彥":"C", "林昆緯":"B", "楊廣安":"C", "謝耀德":"E", "黃紹維":"C", "張仲銘":"D"}},
+      {ym:'2026-12', half:1, values:{"林昆緯":"C", "楊廣安":"D", "謝耀德":"A", "黃紹維":"E", "張仲銘":"B"}},
+      {ym:'2026-12', half:2, values:{"林昆緯":"C", "楊廣安":"E", "謝耀德":"C", "黃紹維":"D", "張仲銘":"B"}},
+      {ym:'2027-01', half:1, values:{"林昆緯":"C", "楊廣安":"A", "謝耀德":"D", "黃紹維":"F", "張仲銘":"E"}},
+      {ym:'2027-01', half:2, values:{"林昆緯":"D", "楊廣安":"C", "謝耀德":"特休", "黃紹維":"E", "張仲銘":"F"}},
+      {ym:'2027-02', half:1, values:{"林昆緯":"C", "楊廣安":"F", "謝耀德":"C", "黃紹維":"B", "張仲銘":"A"}},
+      {ym:'2027-02', half:2, values:{"林昆緯":"F", "楊廣安":"E", "謝耀德":"A", "黃紹維":"B", "張仲銘":"C"}},
+      {ym:'2027-03', half:1, values:{"林昆緯":"A", "楊廣安":"C", "謝耀德":"C", "黃紹維":"C", "張仲銘":"B"}},
+      {ym:'2027-03', half:2, values:{"林昆緯":"C", "楊廣安":"C", "謝耀德":"E", "黃紹維":"D", "張仲銘":"B"}},
+      {ym:'2027-04', half:1, values:{"林昆緯":"特休", "楊廣安":"E", "謝耀德":"F", "黃紹維":"C", "張仲銘":"D"}},
+      {ym:'2027-04', half:2, values:{"林昆緯":"C", "楊廣安":"C", "謝耀德":"C", "黃紹維":"A", "張仲銘":"E"}},
+      {ym:'2027-05', half:1, values:{"林昆緯":"C", "楊廣安":"C", "謝耀德":"A", "黃紹維":"F", "張仲銘":"C"}},
+      {ym:'2027-05', half:2, values:{"林昆緯":"A", "楊廣安":"D", "謝耀德":"C", "黃紹維":"E", "張仲銘":"F"}},
+      {ym:'2027-06', half:1, values:{"林昆緯":"C", "楊廣安":"B", "謝耀德":"C", "黃紹維":"C", "張仲銘":"E"}},
+      {ym:'2027-06', half:2, values:{"林昆緯":"E", "楊廣安":"B", "謝耀德":"C", "黃紹維":"F", "張仲銘":"A"}},
+      {ym:'2027-07', half:1, values:{"林昆緯":"B", "楊廣安":"C", "謝耀德":"E", "黃紹維":"D", "張仲銘":"F"}},
+      {ym:'2027-07', half:2, values:{"林昆緯":"B", "楊廣安":"E", "謝耀德":"特休", "黃紹維":"A", "張仲銘":"D"}},
+    ]
+  },
+
+  /* ---------- 醫師名冊（依科內提供的「醫師名冊.txt」順序排列） ----------
+     來源：醫師名冊.txt，40 人。與原值班表相比：
+       - 馮文翰、張景棠不在這份名冊內，依科內指示從名冊／下拉選單移除
+         （兩人本月既有的值班紀錄仍保留在資料裡，只是不再能被選取或編輯）
+       - 其餘 10 位（傅懋洋、蔡慧玲、吳炯仁、陳勉成、洪志凌、方志元、
+         葉漢根、柴漢東、方修御、黃民評）依科內指示新增為可選成員 */
   dutyRoster: [
-    { name:'陳典佑', gsm:'39844', code:'6118' },
-    { name:'馮文翰', gsm:'17083', code:'k960' },
-    { name:'張景棠', gsm:'50217', code:'8904' },
-    { name:'方燕楠', gsm:'56314', code:'6846' },
-    { name:'蕭豪毅', gsm:'68995', code:'9059' },
+    { name:'陳永隆', gsm:'56121', code:'5468' },
+    { name:'陳煌中', gsm:'56111', code:'6428' },
+    { name:'傅懋洋', gsm:'56099', code:'0010' },
+    { name:'蔡慧玲', gsm:'56102', code:'0017' },
+    { name:'吳炯仁', gsm:'56098', code:'0025' },
+    { name:'陳勉成', gsm:'56103', code:'1481' },
+    { name:'洪志凌', gsm:'56105', code:'4990' },
+    { name:'方志元', gsm:'56106', code:'4050' },
+    { name:'葉漢根', gsm:'56108', code:'4076' },
+    { name:'陳世明', gsm:'56800', code:'2653' },
     { name:'陳建仁', gsm:'56113', code:'4361' },
     { name:'鄭正一', gsm:'56114', code:'4540' },
+    { name:'柴漢東', gsm:'56116', code:'6096' },
     { name:'劉文浩', gsm:'56118', code:'4881' },
     { name:'薛書凱', gsm:'56119', code:'6017' },
     { name:'鍾昇穎', gsm:'56120', code:'6050' },
+    { name:'方修御', gsm:'56407', code:'6285' },
     { name:'鍾文榮', gsm:'56743', code:'6351' },
     { name:'李建和', gsm:'56190', code:'6403' },
+    { name:'黃民評', gsm:'56518', code:'6518' },
+    { name:'方燕楠', gsm:'56314', code:'6846' },
+    { name:'吳勃銳', gsm:'56375', code:'6848' },
+    { name:'陳典佑', gsm:'39844', code:'6118' },
+    { name:'蕭豪毅', gsm:'68995', code:'9059' },
     { name:'曾建豪', gsm:'39721', code:'8249' },
     { name:'鄭又誠', gsm:'56138', code:'9289' },
-    { name:'陳緯',   gsm:'69121', code:'9883' },
-    { name:'林育生', gsm:'69166', code:'J146' },
-    { name:'楊柏威', gsm:'53856', code:'J042' },
-    { name:'陳翔暄', gsm:'69165', code:'9909' },
     { name:'陳奕廷', gsm:'69116', code:'9879' },
+    { name:'陳緯',   gsm:'69121', code:'9883' },
+    { name:'陳翔暄', gsm:'69165', code:'9909' },
+    { name:'楊柏威', gsm:'53856', code:'J042' },
+    { name:'林育生', gsm:'69166', code:'J146' },
+    { name:'侯邦彥', gsm:'39956', code:'J104' },
+    { name:'黃鼎森', gsm:'54021', code:'J123' },
     { name:'黃敬夫', gsm:'54091', code:'J145' },
     { name:'黃庭欣', gsm:'13685', code:'J209' },
-    { name:'黃鼎森', gsm:'54021', code:'J123' },
-    { name:'侯邦彥', gsm:'39956', code:'J104' },
     { name:'林昆緯', gsm:'69138', code:'J100' },
     { name:'楊廣安', gsm:'39260', code:'J125' },
     { name:'謝耀德', gsm:'35213', code:'J367' },
-    { name:'張仲銘', gsm:'69184', code:'J329' },
-    { name:'黃紹維', gsm:'10713', code:'J240' }
+    { name:'黃紹維', gsm:'10713', code:'J240' },
+    { name:'張仲銘', gsm:'69184', code:'J329' }
   ],
 
-  /* ---------- 白天普通會診名冊 ---------- */
+  /* ---------- 白天普通會診名冊（順序同上方醫師名冊） ---------- */
   consultRoster: [
+    { name:'陳永隆', gsm:'56121', code:'5468', avail:'週三（上半月）' },
+    { name:'陳煌中', gsm:'56111', code:'6428', avail:'週二、三' },
     { name:'陳世明', gsm:'56800', code:'2653', avail:'週五' },
     { name:'陳建仁', gsm:'56113', code:'4361', avail:'週二、四' },
     { name:'鄭正一', gsm:'56114', code:'4540', avail:'—' },
     { name:'劉文浩', gsm:'56118', code:'4881', avail:'週一、二' },
     { name:'薛書凱', gsm:'56119', code:'6017', avail:'週一' },
     { name:'鍾昇穎', gsm:'56120', code:'6050', avail:'週一' },
-    { name:'陳永隆', gsm:'56121', code:'5468', avail:'週三（上半月）' },
     { name:'鍾文榮', gsm:'56743', code:'6351', avail:'週三、五' },
-    { name:'陳煌中', gsm:'56111', code:'6428', avail:'週二、三' },
     { name:'李建和', gsm:'56190', code:'6403', avail:'—' },
-    { name:'吳勃銳', gsm:'56375', code:'6848', avail:'週一、二、五' },
     { name:'方燕楠', gsm:'56314', code:'6846', avail:'週一、二、三、五' },
+    { name:'吳勃銳', gsm:'56375', code:'6848', avail:'週一、二、五' },
     { name:'蕭豪毅', gsm:'68995', code:'9059', avail:'週三、五' },
     { name:'曾建豪', gsm:'39721', code:'8249', avail:'週一、二、四' },
     { name:'鄭又誠', gsm:'56138', code:'9289', avail:'週一、五' }
@@ -397,43 +500,43 @@ var MONTH_DATA = {
   halfMonth: [
     { name:'劉廷宏', gsm:'13501', range:'1-15',
       marks:{ 4:'PM', 7:'特休', 10:'PM', 15:'教召', 21:'PM', 24:'PM' } },
-    { name:'黃咸智', gsm:'56095', range:'16-31',
+    { name:'黃威智', gsm:'56095', range:'16-31',
       marks:{ 17:'換休' } }
   ],
 
   /* ---------- 值班表：日 → { 姓名: 代碼 } ---------- */
   duty: {
     1:  { 陳典佑:'D', 李建和:'C', 陳翔暄:'E', 謝耀德:'A' },
-    2:  { 陳典佑:'D', 劉文浩:'C', 黃鼎森:'E', 楊廣安:'A' },
+    2:  { 陳典佑:'D', 劉文浩:'C', 侯邦彥:'E', 楊廣安:'A' },
     3:  { 馮文翰:'D', 蕭豪毅:'健夜', 鍾昇穎:'C', 林育生:'鳳夜', 陳翔暄:'E', 侯邦彥:'特休', 林昆緯:'A', 黃紹維:'A2' },
-    4:  { 方燕楠:'D', 蕭豪毅:'鳳夜', 薛書凱:'C', 黃庭欣:'E', 侯邦彥:'特休', 楊廣安:'A', 張仲銘:'A2' },
-    5:  { 張景棠:'D', 鄭正一:'C', 陳緯:'B', 陳奕廷:'E', 侯邦彥:'特休', 謝耀德:'A' },
-    6:  { 張景棠:'D', 陳建仁:'C', 曾建豪:'B', 鄭又誠:'同夜', 黃庭欣:'E', 侯邦彥:'特休', 張仲銘:'A' },
-    7:  { 馮文翰:'D', 劉文浩:'C', 鄭又誠:'同夜', 陳緯:'E', 陳翔暄:'鳳夜', 侯邦彥:'特休', 楊廣安:'A' },
-    8:  { 馮文翰:'D', 薛書凱:'C', 陳緯:'E', 侯邦彥:'特休', 謝耀德:'S', 張仲銘:'A' },
-    9:  { 馮文翰:'D', 薛書凱:'C', 陳翔暄:'E', 侯邦彥:'特休', 林昆緯:'A1', 謝耀德:'A' },
-    10: { 張景棠:'D', 鍾昇穎:'C', 林育生:'鳳夜', 陳翔暄:'E', 黃庭欣:'A', 楊廣安:'S' },
-    11: { 蕭豪毅:'鳳夜', 李建和:'C', 陳翔暄:'E', 林昆緯:'A' },
-    12: { 方燕楠:'D', 蕭豪毅:'C', 陳緯:'B', 陳奕廷:'E', 林昆緯:'A2', 楊廣安:'A', 謝耀德:'S' },
-    13: { 陳典佑:'D', 鍾文榮:'C', 鄭又誠:'同夜', 黃庭欣:'E', 林昆緯:'A' },
-    14: { 劉文浩:'C', 鄭又誠:'同夜', 陳奕廷:'E', 黃庭欣:'特休', 林昆緯:'A' },
-    15: { 方燕楠:'D', 鍾文榮:'C', 陳奕廷:'E', 林昆緯:'A2', 楊廣安:'A' },
-    16: { 方燕楠:'D', 鍾昇穎:'C', 陳奕廷:'E', 林昆緯:'A', 楊廣安:'A2' },
-    17: { 陳典佑:'D', 蕭豪毅:'健夜', 劉文浩:'C', 林育生:'鳳夜', 侯邦彥:'E', 謝耀德:'U', 張仲銘:'A' },
-    18: { 方燕楠:'D', 蕭豪毅:'鳳夜', 鍾文榮:'C', 鄭又誠:'E', 侯邦彥:'A2', 謝耀德:'A' },
+    4:  { 方燕楠:'D', 蕭豪毅:'鳳夜', 薛書凱:'C', 黃鼎森:'E', 侯邦彥:'特休', 謝耀德:'A', 張仲銘:'A2' },
+    5:  { 張景棠:'D', 鄭正一:'C', 陳緯:'B', 陳奕廷:'E', 黃敬夫:'E', 侯邦彥:'特休', 楊廣安:'A' },
+    6:  { 張景棠:'D', 陳建仁:'C', 曾建豪:'B', 鄭又誠:'同夜', 黃鼎森:'E', 侯邦彥:'特休', 黃紹維:'A' },
+    7:  { 馮文翰:'D', 劉文浩:'C', 鄭又誠:'同夜', 陳緯:'E', 陳翔暄:'鳳夜', 侯邦彥:'特休', 林昆緯:'A' },
+    8:  { 馮文翰:'D', 薛書凱:'C', 陳緯:'E', 侯邦彥:'特休', 謝耀德:'S', 黃紹維:'A' },
+    9:  { 馮文翰:'D', 薛書凱:'C', 陳翔暄:'E', 侯邦彥:'特休', 林昆緯:'A1', 張仲銘:'A' },
+    10: { 張景棠:'D', 鍾昇穎:'C', 林育生:'鳳夜', 陳翔暄:'E', 黃鼎森:'A', 侯邦彥:'特休', 楊廣安:'S' },
+    11: { 蕭豪毅:'鳳夜', 李建和:'C', 陳翔暄:'E', 侯邦彥:'特休', 林昆緯:'A' },
+    12: { 方燕楠:'D', 蕭豪毅:'C', 陳緯:'B', 陳奕廷:'E', 黃敬夫:'E', 侯邦彥:'特休', 謝耀德:'A2', 張仲銘:'A', 黃紹維:'S' },
+    13: { 陳典佑:'D', 鍾文榮:'C', 鄭又誠:'同夜', 黃鼎森:'E', 侯邦彥:'特休', 林昆緯:'A' },
+    14: { 劉文浩:'C', 鄭又誠:'同夜', 陳奕廷:'E', 黃鼎森:'特休', 侯邦彥:'特休', 楊廣安:'A' },
+    15: { 方燕楠:'D', 鍾文榮:'C', 陳奕廷:'E', 林昆緯:'A2', 謝耀德:'A' },
+    16: { 方燕楠:'D', 鍾昇穎:'C', 陳奕廷:'E', 楊廣安:'A', 謝耀德:'A2' },
+    17: { 陳典佑:'D', 蕭豪毅:'健夜', 劉文浩:'C', 林育生:'鳳夜', 侯邦彥:'E', 張仲銘:'U', 黃紹維:'A' },
+    18: { 方燕楠:'D', 蕭豪毅:'鳳夜', 鍾文榮:'C', 鄭又誠:'E', 林昆緯:'A2', 謝耀德:'A' },
     19: { 張景棠:'D', 鄭正一:'C', 曾建豪:'B', 陳緯:'E', 黃紹維:'A' },
-    20: { 陳典佑:'D', 陳建仁:'C', 曾建豪:'B', 鄭又誠:'同夜', 陳奕廷:'E', 林昆緯:'S', 張仲銘:'A' },
+    20: { 陳典佑:'D', 陳建仁:'C', 曾建豪:'B', 鄭又誠:'同夜', 陳奕廷:'E', 黃敬夫:'E', 楊廣安:'S', 張仲銘:'A' },
     21: { 馮文翰:'D', 鍾文榮:'C', 鄭又誠:'同夜', 陳緯:'E', 陳翔暄:'鳳夜', 黃紹維:'A' },
     22: { 方燕楠:'D', 鍾昇穎:'C', 陳緯:'E', 黃鼎森:'A2', 張仲銘:'A' },
     23: { 方燕楠:'D', 劉文浩:'C', 陳翔暄:'E', 楊廣安:'A' },
-    24: { 馮文翰:'D', 蕭豪毅:'健夜', 鍾昇穎:'C', 鄭又誠:'E', 陳緯:'鳳夜', 侯邦彥:'特休', 黃紹維:'特休', 張仲銘:'A' },
-    25: { 方燕楠:'D', 蕭豪毅:'鳳夜', 鍾文榮:'C', 黃敬夫:'E', 楊廣安:'S', 林昆緯:'A' },
-    26: { 張景棠:'D', 鍾文榮:'C', 陳緯:'E', 謝耀德:'U', 侯邦彥:'A' },
-    27: { 陳典佑:'D', 陳建仁:'C', 曾建豪:'B', 鄭又誠:'同夜', 陳奕廷:'E', 黃紹維:'A' },
-    28: { 方燕楠:'D', 薛書凱:'C', 鄭又誠:'同夜', 陳翔暄:'鳳夜', 陳奕廷:'E', 侯邦彥:'A2', 張仲銘:'A' },
-    29: { 方燕楠:'D', 鍾文榮:'C', 陳翔暄:'E', 侯邦彥:'A2', 黃紹維:'A' },
-    30: { 方燕楠:'D', 李建和:'C', 陳翔暄:'E', 張仲銘:'A' },
-    31: { 陳典佑:'D', 蕭豪毅:'健夜', 劉文浩:'C', 陳翔暄:'E', 侯邦彥:'A2', 張仲銘:'U', 謝耀德:'A' }
+    24: { 馮文翰:'D', 蕭豪毅:'健夜', 鍾昇穎:'C', 鄭又誠:'E', 陳緯:'鳳夜', 謝耀德:'特休', 張仲銘:'A', 黃紹維:'特休' },
+    25: { 方燕楠:'D', 蕭豪毅:'鳳夜', 鍾文榮:'C', 黃庭欣:'E', 林昆緯:'A', 楊廣安:'S', 謝耀德:'特休', 黃紹維:'特休' },
+    26: { 張景棠:'D', 鍾文榮:'C', 陳緯:'E', 侯邦彥:'A', 謝耀德:'特休', 張仲銘:'U' },
+    27: { 陳典佑:'D', 陳建仁:'C', 曾建豪:'B', 鄭又誠:'同夜', 陳奕廷:'E', 黃庭欣:'E', 謝耀德:'特休', 黃紹維:'A' },
+    28: { 方燕楠:'D', 薛書凱:'C', 鄭又誠:'同夜', 陳翔暄:'鳳夜', 陳奕廷:'E', 黃敬夫:'E', 楊廣安:'A2', 謝耀德:'特休', 張仲銘:'A' },
+    29: { 方燕楠:'D', 鍾文榮:'C', 陳翔暄:'E', 林昆緯:'A2', 謝耀德:'特休', 黃紹維:'A' },
+    30: { 方燕楠:'D', 李建和:'C', 陳翔暄:'E', 謝耀德:'特休', 張仲銘:'A' },
+    31: { 陳典佑:'D', 蕭豪毅:'健夜', 劉文浩:'C', 陳翔暄:'E', 侯邦彥:'A2', 謝耀德:'A', 黃紹維:'U' }
   },
 
   /* ---------- 白天普通會診：日 → 姓名（週末無班） ---------- */
@@ -443,6 +546,31 @@ var MONTH_DATA = {
     17:'薛書凱', 18:'方燕楠', 19:'鄭正一', 20:'李建和', 21:'鍾文榮',
     24:'鄭又誠', 25:'曾建豪', 26:'方燕楠', 27:'曾建豪', 28:'陳世明',
     31:'鄭又誠'
+  },
+
+  /* ---------- 心臟血管外科 CW 值班（跨科參考用，來源：115年08月心臟血管胸腔外科值班表）
+     這些人不屬於本科（心臟內科），依科內指示不加入通訊錄／「我是」下拉選單，
+     只在「今天」頁顯示當天 CW 值班者的姓名與 GSM。 ---------- */
+  cwRoster: [
+    { name:'周煜倫', code:'1677', gsm:'35809' },
+    { name:'顏維中', code:'9790', gsm:'56673' },
+    { name:'陳彥佑', code:'6669', gsm:'56669' },
+    { name:'陳煜文', code:'9757', gsm:'54062' },
+    { name:'何維',   code:'9723', gsm:'54055' },
+    { name:'林敬凱', code:'J013', gsm:'69180' },
+    { name:'王鈺棠', code:'9614', gsm:'39228' },
+    { name:'方毓琦', code:'9923', gsm:'56266' },
+    { name:'蕭郁馨', code:'9915', gsm:'54058' },
+    { name:'柯瑞媞', code:'J018', gsm:'69185' }
+  ],
+  cwDuty: {
+    1:'周煜倫', 2:'顏維中', 3:'陳彥佑', 4:'陳煜文', 5:'何維',
+    6:'林敬凱', 7:'何維', 8:'方毓琦', 9:'陳煜文', 10:'王鈺棠',
+    11:'陳彥佑', 12:'周煜倫', 13:'何維', 14:'陳煜文', 15:'陳彥佑',
+    16:'何維', 17:'王鈺棠', 18:'陳煜文', 19:'周煜倫', 20:'王鈺棠',
+    21:'何維', 22:'蕭郁馨', 23:'王鈺棠', 24:'陳煜文', 25:'陳彥佑',
+    26:'周煜倫', 27:'顏維中', 28:'林敬凱', 29:'柯瑞媞', 30:'陳彥佑',
+    31:'周煜倫'
   }
 };
 
@@ -487,7 +615,7 @@ const dowOf = d => new Date(Y, M-1, d).getDay();
 const isOff = d => { const w = dowOf(d); return w===0||w===6; };
 const dateStr = d => `${Y}-${pad(M)}-${pad(d)}`;
 
-/* 名冊查詢 */
+/* 通訊錄查詢 */
 function findDoc(name){
   return D.dutyRoster.find(x=>x.name===name)
       || D.consultRoster.find(x=>x.name===name)
@@ -560,7 +688,7 @@ function renderToday(){
   const isToday = t.getFullYear()===Y && t.getMonth()+1===M && t.getDate()===d;
   $('#dSub').textContent = `星期${WD[dowOf(d)]}${isOff(d)?'（假日）':''}${isToday?'　·　今天':''}`;
 
-  /* Hero：我的班 */
+  /* Hero：今天的班 */
   const hb = $('#heroBox'); hb.innerHTML='';
   const mine = myCode(d);
   const hero = el('div','hero'+(mine?' on':''));
@@ -591,7 +719,6 @@ function renderToday(){
         const line = el('div','row'); line.style.gap='6px';
         const w = el('span','who', n); line.appendChild(w);
         if(n===meName) line.appendChild(el('span','me-badge','我'));
-        if(isChief(n)) line.appendChild(el('span','muted','總醫師'));
         box.appendChild(line);
         const doc = findDoc(n);
         if(doc) box.appendChild(el('div','ids', `代號 ${doc.code}　GSM ${doc.gsm}`));
@@ -672,9 +799,31 @@ function renderToday(){
     row.appendChild(b);
     ob.appendChild(row);
   });
+
+  /* 心臟血管外科 CW 值班（跨科參考，不在本科名冊內） */
+  const cwb = $('#cwBox'); cwb.innerHTML='';
+  const cw = cwDocOf(d);
+  if(cw){
+    const row2 = el('div','slot');
+    const tag2 = el('span','tag','CW'); tag2.style.background='#7c3aed'; row2.appendChild(tag2);
+    const b2 = el('div');
+    b2.appendChild(el('div','who', cw.name));
+    b2.appendChild(el('div','ids', 'GSM '+cw.gsm));
+    row2.appendChild(b2);
+    cwb.appendChild(row2);
+  }else{
+    cwb.appendChild(el('div','who none','無資料'));
+  }
+}
+/* 心臟血管外科 CW 值班表查詢（獨立於本科名冊，只給「今天」頁參考用） */
+function cwDocOf(day){
+  const name = D.cwDuty && D.cwDuty[day];
+  if(!name) return null;
+  const r = (D.cwRoster||[]).find(x=>x.name===name);
+  return { name, gsm: r?r.gsm:'', code: r?r.code:'' };
 }
 
-/* ---------- 我的班 ---------- */
+/* ---------- 行事曆 ---------- */
 function renderMine(){
   const box = $('#mineBox'); box.innerHTML='';
   if(!meName){
@@ -687,8 +836,10 @@ function renderMine(){
     const isC = D.consult[d]===meName;
     if(c||isC) rows.push({d, code:c, consult:isC});
   }
-  const dutyCount = rows.filter(r=>r.code && ['A','B','C'].includes(r.code)).length;
-  const offCount  = rows.filter(r=>r.code && ['A','B','C'].includes(r.code) && isOff(r.d)).length;
+  /* 值班數＝所有種類的加總（心臟科 A/B/C、大同 D/E/W/W2/I、內科 A1/A2/S/U、健夜/鳳夜/同夜），
+     只排除休假類（特休/換休/教召/PM），因為那些不算值班 */
+  const dutyCount = rows.filter(r=>r.code && kindOf(r.code)!=='leave').length;
+  const offCount  = rows.filter(r=>r.code && kindOf(r.code)!=='leave' && isOff(r.d)).length;
   const consCount = rows.filter(r=>r.consult).length;
   const today = new Date();
   const todayD = (today.getFullYear()===Y && today.getMonth()+1===M) ? today.getDate() : 0;
@@ -700,35 +851,92 @@ function renderMine(){
   if(doc) sum.appendChild(el('div','ids', `醫師代號 ${doc.code}　GSM ${doc.gsm}`));
   const g = el('div'); g.style.marginTop='10px';
   const st=(l,v)=>{const s=el('span','stat'); s.appendChild(el('b',null,String(v))); s.appendChild(el('span','muted',l)); return s;};
-  g.appendChild(st('值班(A/B/C)', dutyCount));
+  g.appendChild(st('值班', dutyCount));
   g.appendChild(st('其中假日', offCount));
   g.appendChild(st('白天會診', consCount));
   g.appendChild(st('下次', next? `${M}/${next.d}` : '—'));
   sum.appendChild(g);
   box.appendChild(sum);
 
+  /* 總醫師輪訓職務（上半月／下半月）—— 只有輪訓表裡查得到這個人本月資料時才顯示 */
+  const rot = fellowRotationFor(meName, D.meta.month);
+  if(rot){
+    const rc = el('div','card');
+    rc.appendChild(el('h2',null, `${M} 月總醫師輪訓職務`));
+    rc.appendChild(el('p','muted','資料來源：fellowcourse 輪訓表（2026-2027），與心臟科 A/B/C 值班是不同的兩套代碼。'));
+    const hg = el('div','half-grid');
+    [['上半月', rot.first], ['下半月', rot.second]].forEach(([lbl, code])=>{
+      const b = el('div','half-box');
+      b.appendChild(el('div','hlbl', lbl));
+      if(code){
+        const ci = fellowCodeInfo(code);
+        const hc = el('div', ci.color ? 'hcode' : 'hcode plain', code);
+        if(ci.color) hc.style.background = ci.color;
+        b.appendChild(hc);
+        if(ci.note) b.appendChild(el('div','hnote', ci.note));
+      }else{
+        b.appendChild(el('div','hcode plain','—'));
+      }
+      hg.appendChild(b);
+    });
+    rc.appendChild(hg);
+    box.appendChild(rc);
+  }
+
   const c2 = el('div','card');
   c2.appendChild(el('h2',null,'我這個月的班'));
   if(!rows.length){ c2.appendChild(el('p','muted','這個月沒有排到班。')); }
-  else{
-    const t = el('table');
-    const hr = t.insertRow();
-    ['日期','星期','班別'].forEach(h=>{const th=document.createElement('th');th.textContent=h;hr.appendChild(th);});
-    rows.forEach(r=>{
-      const tr = t.insertRow();
-      if(isOff(r.d)) tr.className='off';
-      if(r.d===todayD) tr.style.fontWeight='700';
-      tr.insertCell().textContent = `${M}/${r.d}`;
-      tr.insertCell().textContent = WD[dowOf(r.d)];
-      const c = tr.insertCell();
-      if(r.code){ const ci=codeInfo(r.code); const s=el('span','chip',ci.label); s.style.background=ci.color; c.appendChild(s); }
-      if(r.consult){ const s=el('span','chip','白天會診'); s.style.background='#0f766e'; c.appendChild(s); }
-      tr.onclick = ()=>{ viewDay=r.d; switchTab('today'); renderAll(); };
-      tr.style.cursor='pointer';
-    });
-    c2.appendChild(t);
-  }
+  c2.appendChild(buildMonthCalendar(rows, todayD));
   box.appendChild(c2);
+}
+
+/* 某人在某個月（YYYY-MM）的總醫師輪訓職務：{first, second} 或 null（查不到資料） */
+function fellowRotationFor(name, ym){
+  const fr = D.fellowRotation;
+  if(!fr) return null;
+  const h1 = fr.schedule.find(s=>s.ym===ym && s.half===1);
+  const h2 = fr.schedule.find(s=>s.ym===ym && s.half===2);
+  const first  = h1 && h1.values[name];
+  const second = h2 && h2.values[name];
+  if(!first && !second) return null;
+  return { first: first||null, second: second||null };
+}
+function fellowCodeInfo(code){
+  const fr = D.fellowRotation;
+  return (fr && fr.codes && fr.codes[code]) || { label:code, note:'', color:null };
+}
+
+/* 把「某人這個月的班」畫成月曆格子，而不是列表 */
+function buildMonthCalendar(rows, todayD){
+  const byDay = {};
+  rows.forEach(r=>{ byDay[r.d] = r; });
+  const wrap = el('div','cal');
+  WD.forEach(w=>wrap.appendChild(el('div','dow',w)));
+  const firstDow = dowOf(1);
+  for(let i=0;i<firstDow;i++) wrap.appendChild(el('div','cell empty'));
+  for(let d=1; d<=daysInMonth; d++){
+    const cell = el('div','cell'+(isOff(d)?' off':'')+(d===todayD?' today':''));
+    cell.appendChild(el('div','dnum', String(d)));
+    const chips = el('div','chips');
+    const r = byDay[d];
+    if(r){
+      if(r.code){
+        const ci = codeInfo(r.code);
+        const s = el('span','chip', r.code); s.style.background = ci.color;
+        s.title = ci.label + (ci.note? '　'+ci.note : '');
+        chips.appendChild(s);
+      }
+      if(r.consult){
+        const s = el('span','chip','會診'); s.style.background = '#0f766e'; s.title = '白天普通會診';
+        chips.appendChild(s);
+      }
+    }
+    cell.appendChild(chips);
+    cell.style.cursor = 'pointer';
+    cell.onclick = ()=>{ viewDay=d; switchTab('today'); renderAll(); };
+    wrap.appendChild(cell);
+  }
+  return wrap;
 }
 
 /* ---------- 全月 ---------- */
@@ -790,32 +998,27 @@ function renderAllMonth(){
   });
 }
 
-/* ---------- 名冊 ---------- */
+/* ---------- 通訊錄 ---------- */
 function renderDir(){
   const q = ($('#dirSearch').value||'').trim().toLowerCase();
   const hit = r => !q || r.name.toLowerCase().includes(q)
     || String(r.code).toLowerCase().includes(q) || String(r.gsm).toLowerCase().includes(q);
 
-  const build = (tbl, list, extra) => {
+  const build = (tbl, list) => {
     tbl.innerHTML='';
     const hr = tbl.insertRow();
-    const cols = ['','姓名','醫師代號','GSM'].concat(extra?['可排']:[]);
-    cols.forEach(h=>{const th=document.createElement('th');th.textContent=h;hr.appendChild(th);});
+    ['姓名','醫師代號','GSM'].forEach(h=>{const th=document.createElement('th');th.textContent=h;hr.appendChild(th);});
     list.filter(hit).forEach(r=>{
       const tr = tbl.insertRow();
       if(r.name===meName) tr.className='me';
-      tr.insertCell().textContent = isChief(r.name)?'★':'';
       tr.insertCell().textContent = r.name;
       const c1=tr.insertCell(); c1.className='mono'; c1.textContent=r.code;
       const c2=tr.insertCell(); c2.className='mono'; c2.textContent=r.gsm;
-      if(extra) tr.insertCell().textContent = r.avail||'';
       tr.style.cursor='pointer';
       tr.onclick = ()=>copy(`${r.name}\t${r.code}\t${r.gsm}`, tr);
     });
-    if(!tbl.rows.length-1) {}
   };
-  build($('#dirTbl'), D.dutyRoster, false);
-  build($('#dirTbl2'), D.consultRoster, true);
+  build($('#dirTbl'), D.dutyRoster);
 }
 function copy(text, node){
   const done = ()=>{ if(node){ const o=node.style.background; node.style.background='var(--ok-soft)';
@@ -831,12 +1034,9 @@ function fallback(text, cb){
 $('#dirSearch').oninput = renderDir;
 $('#btnCopyDuty').onclick = ()=>copy(
   '姓名\t醫師代號\tGSM\n'+D.dutyRoster.map(r=>`${r.name}\t${r.code}\t${r.gsm}`).join('\n'), $('#btnCopyDuty'));
-$('#btnCopyCons').onclick = ()=>copy(
-  '姓名\t醫師代號\tGSM\t可排\n'+D.consultRoster.map(r=>`${r.name}\t${r.code}\t${r.gsm}\t${r.avail||''}`).join('\n'), $('#btnCopyCons'));
 $('#btnCsvDir').onclick = ()=>{
-  const rows=[['表別','總醫師','姓名','醫師代號','GSM','可排']];
-  D.dutyRoster.forEach(r=>rows.push(['值班表', isChief(r.name)?'★':'', r.name, r.code, r.gsm, '']));
-  D.consultRoster.forEach(r=>rows.push(['會診表','', r.name, r.code, r.gsm, r.avail||'']));
+  const rows=[['姓名','醫師代號','GSM']];
+  D.dutyRoster.forEach(r=>rows.push([r.name, r.code, r.gsm]));
   download('roster_'+D.meta.month+'.csv',
     '﻿'+rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\r\n'),'text/csv');
 };
@@ -863,7 +1063,10 @@ function openEditDay(d){
   });
   const save1 = el('button','btn','儲存'); save1.style.cssText='width:100%;margin-top:12px';
   save1.onclick = ()=>{
-    const nd = {};
+    // 表單只涵蓋通訊錄內的人；通訊錄外的人（如已從通訊錄移除但當月仍有排班紀錄的人）
+    // 這裡完整保留，避免存檔時被靜默清空。
+    const nd = Object.assign({}, day);
+    D.dutyRoster.forEach(r=>{ delete nd[r.name]; });
     inputs.forEach(([n,sel])=>{ if(sel.value) nd[n]=sel.value; });
     D.duty[d] = nd; save(); renderAll();
     $('#modal').classList.remove('on');
@@ -927,7 +1130,7 @@ function parseDutyPaste(text){
 function showParse(target, res){
   const box = $(target); box.innerHTML='';
   let html = `<div class="note ${res.unknown.length?'warn':'ok'}">解析到 ${res.rows} 天、${res.names.length} 位醫師。`;
-  if(res.unknown.length) html += `<br>⚠️ 名冊中沒有這些姓名：${res.unknown.join('、')}（仍會保留，但名冊查不到代號）`;
+  if(res.unknown.length) html += `<br>⚠️ 通訊錄中沒有這些姓名：${res.unknown.join('、')}（仍會保留，但通訊錄查不到代號）`;
   html += '</div>';
   const codes = new Set();
   Object.values(res.duty).forEach(r=>Object.values(r).forEach(c=>codes.add(c)));
@@ -994,7 +1197,7 @@ $('#btnParseCons').onclick = ()=>{
     }
   }
   let html = `<div class="note ${unknown.size?'warn':'ok'}">解析到 ${n} 天的白天會診。`;
-  if(unknown.size) html += `<br>⚠️ 名冊中沒有：${[...unknown].join('、')}`;
+  if(unknown.size) html += `<br>⚠️ 通訊錄中沒有：${[...unknown].join('、')}`;
   html += '</div>';
   const wk = []; for(let d=1;d<=daysInMonth;d++) if(!isOff(d) && !cons[d]) wk.push(d);
   if(wk.length) html += `<div class="note warn">⚠️ 這些平日沒有會診醫師：${wk.join('、')}</div>`;
@@ -1062,7 +1265,7 @@ function renderVerify(){
     const wrap = el('div'); wrap.appendChild(n); wrap.appendChild(btn); wrap.style.marginBottom='12px';
     b.appendChild(wrap);
   };
-  item('roster','醫師名冊（GSM／醫師代號）','來自表頭，清晰可讀');
+  item('roster','醫師通訊錄（GSM／醫師代號）','來自表頭，清晰可讀');
   item('consult','白天普通會診表','已用「可排星期」交叉驗證 21 筆全數吻合');
   item('duty','值班表 A/B/C 班','A 班 31 天全數由使用者確認；如需修改用上方「A/B/C 班快速編輯」');
 
@@ -1149,7 +1352,7 @@ function renderAll(){
   const seen = new Set();
   D.dutyRoster.concat(D.consultRoster).forEach(r=>{
     if(seen.has(r.name)) return; seen.add(r.name);
-    sel.appendChild(new Option(r.name + (isChief(r.name)?'（總醫師）':''), r.name));
+    sel.appendChild(new Option(r.name, r.name));
   });
   sel.value = cur;
 

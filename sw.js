@@ -6,7 +6,7 @@
      · App 本身（HTML／圖示） → 快取優先，背景更新
    改版時把 VERSION 加一，舊快取會自動清掉。
    ------------------------------------------------------------------ */
-const VERSION = 'v1';
+const VERSION = 'v9';
 const CACHE   = 'cv-duty-' + VERSION;
 
 const SHELL = [
