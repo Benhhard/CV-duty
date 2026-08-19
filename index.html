@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0e7490">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<title>心臟內科班表</title>
+<style>
+:root{
+  --bg:#f6f8fa; --card:#fff; --ink:#0f172a; --muted:#64748b; --line:#e2e8f0;
+  --brand:#0e7490; --brand-ink:#fff; --brand-soft:#ecfeff;
+  --warn:#b45309; --warn-soft:#fffbeb; --danger:#b91c1c; --danger-soft:#fef2f2;
+  --ok:#15803d; --ok-soft:#f0fdf4;
+  --shadow:0 1px 2px rgba(15,23,42,.06),0 4px 12px rgba(15,23,42,.05);
+}
+[data-theme="dark"]{
+  --bg:#0b1220; --card:#131c2e; --ink:#e8eef7; --muted:#94a3b8; --line:#25324a;
+  --brand:#22d3ee; --brand-ink:#04202b; --brand-soft:#0d2b36;
+  --warn:#fbbf24; --warn-soft:#2a2410; --danger:#f87171; --danger-soft:#2c1618;
+  --ok:#4ade80; --ok-soft:#102a1a;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  background:var(--bg);color:var(--ink);font-size:15px;line-height:1.55;-webkit-text-size-adjust:100%}
+header{position:sticky;top:0;z-index:50;background:var(--brand);color:var(--brand-ink);
+  padding:calc(env(safe-area-inset-top) + 10px) 14px 0}
+.hd-row{display:flex;align-items:center;gap:10px;padding-bottom:8px}
+.hd-title{font-weight:700;font-size:17px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hd-btn{background:rgba(255,255,255,.16);border:0;color:inherit;font:inherit;padding:5px 10px;
+  border-radius:8px;cursor:pointer;font-size:13px}
+nav{display:flex;overflow-x:auto;scrollbar-width:none;gap:2px}
+nav::-webkit-scrollbar{display:none}
+nav button{flex:0 0 auto;background:none;border:0;color:inherit;font:inherit;font-size:14px;
+  padding:9px 14px;cursor:pointer;opacity:.72;border-bottom:3px solid transparent;white-space:nowrap}
+nav button[aria-selected="true"]{opacity:1;font-weight:600;border-bottom-color:currentColor}
+main{padding:14px;max-width:900px;margin:0 auto;padding-bottom:calc(env(safe-area-inset-bottom) + 40px)}
+.panel{display:none}.panel.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;
+  margin-bottom:12px;box-shadow:var(--shadow)}
+h2{font-size:15px;margin:0 0 10px;font-weight:700}
+h3{font-size:12px;margin:16px 0 6px;font-weight:700;color:var(--muted);letter-spacing:.06em}
+.muted{color:var(--muted);font-size:13px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.spacer{flex:1}
+button.btn{background:var(--brand);color:var(--brand-ink);border:0;border-radius:9px;padding:9px 14px;
+  font:inherit;font-weight:600;cursor:pointer;font-size:14px}
+button.btn.ghost{background:transparent;color:var(--brand);border:1px solid var(--line)}
+button.btn.sm{padding:5px 10px;font-size:13px;font-weight:500}
+input,select,textarea{font:inherit;font-size:14px;padding:8px 10px;border:1px solid var(--line);
+  border-radius:9px;background:var(--card);color:var(--ink);max-width:100%}
+textarea{width:100%;min-height:120px;font-family:ui-monospace,Menlo,monospace;font-size:12px}
+label.fld{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+/* 今天 */
+.datebar{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.datebig{flex:1;text-align:center}
+.datebig b{display:block;font-size:20px;font-weight:700}
+.hero{border-radius:14px;padding:16px;margin-bottom:12px;border:1px solid var(--line);background:var(--card)}
+.hero.on{background:var(--brand);color:var(--brand-ink);border-color:transparent}
+.hero .lbl{font-size:13px;opacity:.85}
+.hero .val{font-size:26px;font-weight:700;line-height:1.25;margin-top:2px}
+.slot{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
+.slot:last-child{border-bottom:0}
+.tag{flex:0 0 auto;min-width:52px;text-align:center;border-radius:7px;padding:3px 8px;
+  color:#fff;font-size:12px;font-weight:700}
+.who{font-size:17px;font-weight:600}
+.who.none{color:var(--muted);font-weight:400;font-size:15px}
+.ids{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.me-badge{background:var(--brand);color:var(--brand-ink);border-radius:5px;padding:1px 6px;font-size:11px;font-weight:700}
+/* 表格 */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--line)}
+th{font-size:11px;color:var(--muted);letter-spacing:.05em;font-weight:700;position:sticky;top:0;background:var(--card)}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+td.mono,th.mono{font-variant-numeric:tabular-nums;font-family:ui-monospace,Menlo,monospace}
+tr.me td{background:var(--brand-soft)}
+tr.off td:first-child{color:var(--danger)}
+.chip{display:inline-block;border-radius:5px;padding:1px 6px;color:#fff;font-size:11px;font-weight:700;margin:1px}
+.note{border-radius:10px;padding:9px 12px;font-size:13px;margin-bottom:10px;border:1px solid}
+.note.ok{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.note.warn{background:var(--warn-soft);border-color:var(--warn);color:var(--warn)}
+.note.bad{background:var(--danger-soft);border-color:var(--danger);color:var(--danger)}
+.note.info{background:var(--brand-soft);border-color:var(--brand);color:var(--brand)}
+.banner{position:fixed;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom) + 12px);
+  z-index:120;background:var(--brand);color:var(--brand-ink);border-radius:12px;padding:12px 14px;
+  box-shadow:0 6px 24px rgba(15,23,42,.28);display:none;align-items:center;gap:10px;max-width:560px;margin:0 auto}
+.banner.on{display:flex}
+.banner span{flex:1;font-size:14px;line-height:1.4}
+.banner button{background:rgba(255,255,255,.2);border:0;color:inherit;font:inherit;font-weight:600;
+  padding:7px 12px;border-radius:8px;cursor:pointer;font-size:13px;white-space:nowrap}
+.banner button.x{background:transparent;padding:7px 4px;opacity:.7}
+.stat{display:inline-block;margin-right:20px}
+.stat b{display:block;font-size:22px;font-weight:700}
+.modal{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;z-index:100;align-items:flex-end;justify-content:center}
+.modal.on{display:flex}
+.sheet{background:var(--card);width:100%;max-width:520px;border-radius:16px 16px 0 0;padding:16px;
+  max-height:82vh;overflow:auto;padding-bottom:calc(env(safe-area-inset-bottom) + 16px)}
+@media(min-width:600px){.modal{align-items:center}.sheet{border-radius:16px}}
+@media print{header,nav,.no-print{display:none!important}body{background:#fff;font-size:11px}
+  main{padding:0;max-width:none}.card{box-shadow:none;break-inside:avoid}
+  .panel{display:none!important}.panel.on{display:block!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hd-row">
+    <span class="hd-title" id="hdTitle">心臟內科班表</span>
+    <button class="hd-btn" id="btnTheme">◐</button>
+  </div>
+  <nav id="tabs">
+    <button data-p="today" aria-selected="true">今天</button>
+    <button data-p="mine"  aria-selected="false">我的班</button>
+    <button data-p="all"   aria-selected="false">全月</button>
+    <button data-p="dir"   aria-selected="false">名冊</button>
+    <button data-p="io"    aria-selected="false">更新資料</button>
+  </nav>
+</header>
+
+<main>
+  <!-- ============ 今天 ============ -->
+  <section class="panel on" id="p-today">
+    <div class="card">
+      <div class="row no-print" style="margin-bottom:10px">
+        <label class="fld" style="flex:1">我是
+          <select id="me"></select></label>
+      </div>
+      <div class="datebar no-print">
+        <button class="btn ghost sm" id="dPrev">‹</button>
+        <div class="datebig"><b id="dBig"></b><span class="muted" id="dSub"></span></div>
+        <button class="btn ghost sm" id="dNext">›</button>
+      </div>
+      <button class="btn ghost sm no-print" id="dToday" style="width:100%;margin-bottom:12px">回到今天</button>
+      <div id="heroBox"></div>
+    </div>
+    <div class="card">
+      <h2>值班</h2>
+      <div id="dutyBox"></div>
+    </div>
+    <div class="card">
+      <h2>白天普通會診</h2>
+      <div id="consultBox"></div>
+    </div>
+    <div class="card">
+      <h2>當日其他班別</h2>
+      <div id="otherBox"></div>
+    </div>
+  </section>
+
+  <!-- ============ 我的班 ============ -->
+  <section class="panel" id="p-mine">
+    <div id="mineBox"></div>
+  </section>
+
+  <!-- ============ 全月 ============ -->
+  <section class="panel" id="p-all">
+    <div class="card">
+      <h2>值班表 — A / B / C 班</h2>
+      <div class="scroll"><table id="abcTbl"></table></div>
+    </div>
+    <div class="card">
+      <h2>白天普通會診表</h2>
+      <div class="scroll"><table id="consultTbl"></table></div>
+    </div>
+    <div class="card">
+      <h2>代碼說明</h2>
+      <div id="codeBox"></div>
+    </div>
+  </section>
+
+  <!-- ============ 名冊 ============ -->
+  <section class="panel" id="p-dir">
+    <div class="card">
+      <div class="row" style="margin-bottom:10px">
+        <input id="dirSearch" placeholder="搜尋姓名、醫師代號或 GSM" style="flex:1;min-width:160px">
+      </div>
+      <h2>心臟內科值班表名冊</h2>
+      <p class="muted" style="margin-top:0">點任一列可複製該員的醫師代號與 GSM。★ 為總醫師。</p>
+      <div class="scroll"><table id="dirTbl"></table></div>
+    </div>
+    <div class="card">
+      <h2>白天普通會診名冊</h2>
+      <p class="muted" style="margin-top:0">「可排」為該員原表註記的可排班星期。</p>
+      <div class="scroll"><table id="dirTbl2"></table></div>
+    </div>
+    <div class="card no-print">
+      <h2>整批複製</h2>
+      <div class="row">
+        <button class="btn ghost sm" id="btnCopyDuty">複製值班名冊</button>
+        <button class="btn ghost sm" id="btnCopyCons">複製會診名冊</button>
+        <button class="btn ghost sm" id="btnCsvDir">下載 CSV</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 更新資料 ============ -->
+  <section class="panel" id="p-io">
+    <div class="card">
+      <h2>逐日修改</h2>
+      <p class="muted" style="margin-top:0">最快的更正方式：選日期，直接改當天每個人的代碼。</p>
+      <div class="row">
+        <select id="editDay" style="flex:1;min-width:140px"></select>
+        <button class="btn sm" id="btnEditDay">開啟編輯</button>
+      </div>
+    </div>
+
+    <div class="card" id="installCard">
+      <h2>把班表裝成手機 App</h2>
+      <div id="installBox"></div>
+    </div>
+
+    <div class="card">
+      <h2>A / B / C 班快速編輯</h2>
+      <p class="muted" style="margin-top:0">
+        整月三個班別排在同一頁，對著紙本由上往下改最快。改完按最下面的「儲存」。
+      </p>
+      <div class="scroll"><table id="abcEdit"></table></div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="btnSaveAbc">儲存 A/B/C 班</button>
+        <span class="muted" id="abcMsg"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>從 Excel 貼上整月值班表</h2>
+      <p class="muted" style="margin-top:0">
+        在 Excel 選取「姓名列 + 31 天的格子」一起複製，貼進下面按解析。<br>
+        第一列＝醫師姓名，之後每一列＝一天（第一格是日期數字，其餘依序對應姓名）。
+      </p>
+      <textarea id="pasteDuty" spellcheck="false" placeholder="陳典佑&#9;馮文翰&#9;張景棠&#9;…&#10;1&#9;D&#9;&#9;&#9;…&#10;2&#9;D&#9;&#9;&#9;…"></textarea>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" id="btnParseDuty">解析並套用</button>
+        <button class="btn ghost sm" id="btnPreviewDuty">只預覽不套用</button>
+      </div>
+      <div id="parseMsg"></div>
+    </div>
+
+    <div class="card">
+      <h2>從 Excel 貼上白天會診表</h2>
+      <p class="muted" style="margin-top:0">格式同上，格子裡打 V 或任何符號即可；也可以每行寫「日期 姓名」，例如 <code>3 劉文浩</code>。</p>
+      <textarea id="pasteCons" spellcheck="false" placeholder="3&#9;劉文浩&#10;4&#9;吳勃銳&#10;5&#9;陳永隆"></textarea>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" id="btnParseCons">解析並套用</button>
+      </div>
+      <div id="parseMsg2"></div>
+    </div>
+
+    <div class="card">
+      <h2>發布給全科</h2>
+      <ol class="muted" style="margin:0;padding-left:20px;line-height:1.9">
+        <li>改好之後按「下載 schedule.json」</li>
+        <li>上傳到放這個網頁的同一個資料夾（覆蓋舊檔）</li>
+        <li>同仁重新整理就看到新資料</li>
+      </ol>
+      <div class="row" style="margin-top:12px">
+        <button class="btn" id="btnJson">下載 schedule.json</button>
+        <button class="btn ghost" id="btnIcs">下載我的班 .ics</button>
+        <button class="btn ghost" id="btnPrint">列印</button>
+      </div>
+      <div class="muted" id="srcInfo" style="margin-top:10px"></div>
+    </div>
+
+    <div class="card">
+      <h2>核對狀態</h2>
+      <div id="verifyBox"></div>
+    </div>
+
+    <div class="card">
+      <h2>備份／還原</h2>
+      <textarea id="rawCfg" spellcheck="false"></textarea>
+      <div class="row" style="margin-top:8px">
+        <button class="btn ghost sm" id="btnCopyRaw">複製</button>
+        <button class="btn ghost sm" id="btnApplyRaw">套用貼上的內容</button>
+        <span class="spacer"></span>
+        <button class="btn ghost sm" id="btnReset">回復內建 8 月資料</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="banner no-print" id="banner">
+  <span id="bannerText"></span>
+  <button id="bannerAct"></button>
+  <button class="x" id="bannerClose">✕</button>
+</div>
+
+<div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
+
+<script>
+/* ============================================================
+   115 年 8 月（2026-08）心臟內科班表資料
+   來源：「115年8月心臟內科值班表」與「115年8月週間白天普通會診主治醫師排班表」
+        （兩份表單日期皆為 20260730）
+   核對紀錄（皆由使用者確認）：
+     - 8/28 C 班為薛書凱
+     - S 與 U 為內科加護病房班
+     - 星號與 X 兩種標記依科內指示忽略，已從資料中移除
+     - 8/18 起的 A 班原判讀錯誤，已依使用者提供的姓氏序重寫：
+       18 謝耀德、19 黃紹維、20 張仲銘、21 黃紹維、22 張仲銘、23 楊廣安、24 張仲銘、
+       25 林昆緯、26 侯邦彥、27 黃紹維、28 張仲銘、29 黃紹維、30 張仲銘、31 謝耀德
+   ============================================================ */
+var MONTH_DATA = {
+  meta: {
+    month: '2026-08',
+    dept: '心臟內科',
+    source: '20260730',
+    verified: { roster: true, consult: true, duty: true }
+  },
+
+  /* ---------- 代碼說明（值班表底部原文 + 推得） ---------- */
+  codes: {
+    'A':  { label:'A班',          note:'心臟科值班（總醫師）', kind:'duty', color:'#0e7490' },
+    'B':  { label:'B班',          note:'心臟科值班',           kind:'duty', color:'#7c3aed' },
+    'C':  { label:'C班',          note:'心臟科值班（主治）',   kind:'duty', color:'#b45309' },
+    'D':  { label:'D班',          note:'大同班（+D＝合併值大同PCI班）', kind:'other', color:'#0f766e' },
+    'E':  { label:'大同一線班',    note:'表單原文：E: 大同一線班', kind:'other', color:'#15803d' },
+    'W':  { label:'大同病房班',    note:'表單原文：W: 大同病房班', kind:'other', color:'#15803d' },
+    'W2': { label:'大同病房預備班', note:'表單原文：W2: 大同病房預備班', kind:'other', color:'#15803d' },
+    'I':  { label:'大同ICU班',    note:'表單原文：I: 大同ICU班', kind:'other', color:'#15803d' },
+    'A1': { label:'內科總值班 A1', note:'內科總醫師總值班第一線', kind:'gsm', color:'#be123c' },
+    'A2': { label:'內科總值班 A2', note:'內科總醫師總值班第二線', kind:'gsm', color:'#be123c' },
+    'S':  { label:'ICU班(S)', note:'內科加護病房班', kind:'gsm', color:'#7c3aed' },
+    'U':  { label:'ICU班(U)', note:'內科加護病房班', kind:'gsm', color:'#7c3aed' },
+    '*':  { label:'★', note:'原表標記，依科內指示忽略', kind:'ignore', color:'#94a3b8' },
+    'X':  { label:'X', note:'原表標記，依科內指示忽略', kind:'ignore', color:'#94a3b8' },
+    '健夜': { label:'健夜', note:'支援夜診', kind:'support', color:'#a16207' },
+    '鳳夜': { label:'鳳夜', note:'支援夜診', kind:'support', color:'#a16207' },
+    '同夜': { label:'同夜', note:'支援夜診', kind:'support', color:'#a16207' },
+    '特休': { label:'特休', note:'休假', kind:'leave', color:'#94a3b8' },
+    '換休': { label:'換休', note:'休假', kind:'leave', color:'#94a3b8' },
+    '教召': { label:'教召', note:'教育召集', kind:'leave', color:'#94a3b8' },
+    'PM':  { label:'PM',  note:'下午不可排', kind:'leave', color:'#94a3b8' }
+  },
+
+  /* 使用者指定的心臟科總醫師 */
+  chiefs: ['黃鼎森','黃敬夫','侯邦彥','楊廣安','林昆緯','謝耀德','黃紹維','張仲銘'],
+
+  /* ---------- 值班表名冊（依表格欄位順序） ---------- */
+  dutyRoster: [
+    { name:'陳典佑', gsm:'39844', code:'6118' },
+    { name:'馮文翰', gsm:'17083', code:'k960' },
+    { name:'張景棠', gsm:'50217', code:'8904' },
+    { name:'方燕楠', gsm:'56314', code:'6846' },
+    { name:'蕭豪毅', gsm:'68995', code:'9059' },
+    { name:'陳建仁', gsm:'56113', code:'4361' },
+    { name:'鄭正一', gsm:'56114', code:'4540' },
+    { name:'劉文浩', gsm:'56118', code:'4881' },
+    { name:'薛書凱', gsm:'56119', code:'6017' },
+    { name:'鍾昇穎', gsm:'56120', code:'6050' },
+    { name:'鍾文榮', gsm:'56743', code:'6351' },
+    { name:'李建和', gsm:'56190', code:'6403' },
+    { name:'曾建豪', gsm:'39721', code:'8249' },
+    { name:'鄭又誠', gsm:'56138', code:'9289' },
+    { name:'陳緯',   gsm:'69121', code:'9883' },
+    { name:'林育生', gsm:'69166', code:'J146' },
+    { name:'楊柏威', gsm:'53856', code:'J042' },
+    { name:'陳翔暄', gsm:'69165', code:'9909' },
+    { name:'陳奕廷', gsm:'69116', code:'9879' },
+    { name:'黃敬夫', gsm:'54091', code:'J145' },
+    { name:'黃庭欣', gsm:'13685', code:'J209' },
+    { name:'黃鼎森', gsm:'54021', code:'J123' },
+    { name:'侯邦彥', gsm:'39956', code:'J104' },
+    { name:'林昆緯', gsm:'69138', code:'J100' },
+    { name:'楊廣安', gsm:'39260', code:'J125' },
+    { name:'謝耀德', gsm:'35213', code:'J367' },
+    { name:'張仲銘', gsm:'69184', code:'J329' },
+    { name:'黃紹維', gsm:'10713', code:'J240' }
+  ],
+
+  /* ---------- 白天普通會診名冊 ---------- */
+  consultRoster: [
+    { name:'陳世明', gsm:'56800', code:'2653', avail:'週五' },
+    { name:'陳建仁', gsm:'56113', code:'4361', avail:'週二、四' },
+    { name:'鄭正一', gsm:'56114', code:'4540', avail:'—' },
+    { name:'劉文浩', gsm:'56118', code:'4881', avail:'週一、二' },
+    { name:'薛書凱', gsm:'56119', code:'6017', avail:'週一' },
+    { name:'鍾昇穎', gsm:'56120', code:'6050', avail:'週一' },
+    { name:'陳永隆', gsm:'56121', code:'5468', avail:'週三（上半月）' },
+    { name:'鍾文榮', gsm:'56743', code:'6351', avail:'週三、五' },
+    { name:'陳煌中', gsm:'56111', code:'6428', avail:'週二、三' },
+    { name:'李建和', gsm:'56190', code:'6403', avail:'—' },
+    { name:'吳勃銳', gsm:'56375', code:'6848', avail:'週一、二、五' },
+    { name:'方燕楠', gsm:'56314', code:'6846', avail:'週一、二、三、五' },
+    { name:'蕭豪毅', gsm:'68995', code:'9059', avail:'週三、五' },
+    { name:'曾建豪', gsm:'39721', code:'8249', avail:'週一、二、四' },
+    { name:'鄭又誠', gsm:'56138', code:'9289', avail:'週一、五' }
+  ],
+
+  /* 會診表左側半月輪值欄 */
+  halfMonth: [
+    { name:'劉廷宏', gsm:'13501', range:'1-15',
+      marks:{ 4:'PM', 7:'特休', 10:'PM', 15:'教召', 21:'PM', 24:'PM' } },
+    { name:'黃咸智', gsm:'56095', range:'16-31',
+      marks:{ 17:'換休' } }
+  ],
+
+  /* ---------- 值班表：日 → { 姓名: 代碼 } ---------- */
+  duty: {
+    1:  { 陳典佑:'D', 李建和:'C', 陳翔暄:'E', 謝耀德:'A' },
+    2:  { 陳典佑:'D', 劉文浩:'C', 黃鼎森:'E', 楊廣安:'A' },
+    3:  { 馮文翰:'D', 蕭豪毅:'健夜', 鍾昇穎:'C', 林育生:'鳳夜', 陳翔暄:'E', 侯邦彥:'特休', 林昆緯:'A', 黃紹維:'A2' },
+    4:  { 方燕楠:'D', 蕭豪毅:'鳳夜', 薛書凱:'C', 黃庭欣:'E', 侯邦彥:'特休', 楊廣安:'A', 張仲銘:'A2' },
+    5:  { 張景棠:'D', 鄭正一:'C', 陳緯:'B', 陳奕廷:'E', 侯邦彥:'特休', 謝耀德:'A' },
+    6:  { 張景棠:'D', 陳建仁:'C', 曾建豪:'B', 鄭又誠:'同夜', 黃庭欣:'E', 侯邦彥:'特休', 張仲銘:'A' },
+    7:  { 馮文翰:'D', 劉文浩:'C', 鄭又誠:'同夜', 陳緯:'E', 陳翔暄:'鳳夜', 侯邦彥:'特休', 楊廣安:'A' },
+    8:  { 馮文翰:'D', 薛書凱:'C', 陳緯:'E', 侯邦彥:'特休', 謝耀德:'S', 張仲銘:'A' },
+    9:  { 馮文翰:'D', 薛書凱:'C', 陳翔暄:'E', 侯邦彥:'特休', 林昆緯:'A1', 謝耀德:'A' },
+    10: { 張景棠:'D', 鍾昇穎:'C', 林育生:'鳳夜', 陳翔暄:'E', 黃庭欣:'A', 楊廣安:'S' },
+    11: { 蕭豪毅:'鳳夜', 李建和:'C', 陳翔暄:'E', 林昆緯:'A' },
+    12: { 方燕楠:'D', 蕭豪毅:'C', 陳緯:'B', 陳奕廷:'E', 林昆緯:'A2', 楊廣安:'A', 謝耀德:'S' },
+    13: { 陳典佑:'D', 鍾文榮:'C', 鄭又誠:'同夜', 黃庭欣:'E', 林昆緯:'A' },
+    14: { 劉文浩:'C', 鄭又誠:'同夜', 陳奕廷:'E', 黃庭欣:'特休', 林昆緯:'A' },
+    15: { 方燕楠:'D', 鍾文榮:'C', 陳奕廷:'E', 林昆緯:'A2', 楊廣安:'A' },
+    16: { 方燕楠:'D', 鍾昇穎:'C', 陳奕廷:'E', 林昆緯:'A', 楊廣安:'A2' },
+    17: { 陳典佑:'D', 蕭豪毅:'健夜', 劉文浩:'C', 林育生:'鳳夜', 侯邦彥:'E', 謝耀德:'U', 張仲銘:'A' },
+    18: { 方燕楠:'D', 蕭豪毅:'鳳夜', 鍾文榮:'C', 鄭又誠:'E', 侯邦彥:'A2', 謝耀德:'A' },
+    19: { 張景棠:'D', 鄭正一:'C', 曾建豪:'B', 陳緯:'E', 黃紹維:'A' },
+    20: { 陳典佑:'D', 陳建仁:'C', 曾建豪:'B', 鄭又誠:'同夜', 陳奕廷:'E', 林昆緯:'S', 張仲銘:'A' },
+    21: { 馮文翰:'D', 鍾文榮:'C', 鄭又誠:'同夜', 陳緯:'E', 陳翔暄:'鳳夜', 黃紹維:'A' },
+    22: { 方燕楠:'D', 鍾昇穎:'C', 陳緯:'E', 黃鼎森:'A2', 張仲銘:'A' },
+    23: { 方燕楠:'D', 劉文浩:'C', 陳翔暄:'E', 楊廣安:'A' },
+    24: { 馮文翰:'D', 蕭豪毅:'健夜', 鍾昇穎:'C', 鄭又誠:'E', 陳緯:'鳳夜', 侯邦彥:'特休', 黃紹維:'特休', 張仲銘:'A' },
+    25: { 方燕楠:'D', 蕭豪毅:'鳳夜', 鍾文榮:'C', 黃敬夫:'E', 楊廣安:'S', 林昆緯:'A' },
+    26: { 張景棠:'D', 鍾文榮:'C', 陳緯:'E', 謝耀德:'U', 侯邦彥:'A' },
+    27: { 陳典佑:'D', 陳建仁:'C', 曾建豪:'B', 鄭又誠:'同夜', 陳奕廷:'E', 黃紹維:'A' },
+    28: { 方燕楠:'D', 薛書凱:'C', 鄭又誠:'同夜', 陳翔暄:'鳳夜', 陳奕廷:'E', 侯邦彥:'A2', 張仲銘:'A' },
+    29: { 方燕楠:'D', 鍾文榮:'C', 陳翔暄:'E', 侯邦彥:'A2', 黃紹維:'A' },
+    30: { 方燕楠:'D', 李建和:'C', 陳翔暄:'E', 張仲銘:'A' },
+    31: { 陳典佑:'D', 蕭豪毅:'健夜', 劉文浩:'C', 陳翔暄:'E', 侯邦彥:'A2', 張仲銘:'U', 謝耀德:'A' }
+  },
+
+  /* ---------- 白天普通會診：日 → 姓名（週末無班） ---------- */
+  consult: {
+    3:'劉文浩', 4:'吳勃銳', 5:'陳永隆', 6:'李建和', 7:'蕭豪毅',
+    10:'鍾昇穎', 11:'陳煌中', 12:'蕭豪毅', 13:'陳建仁', 14:'陳世明',
+    17:'薛書凱', 18:'方燕楠', 19:'鄭正一', 20:'李建和', 21:'鍾文榮',
+    24:'鄭又誠', 25:'曾建豪', 26:'方燕楠', 27:'曾建豪', 28:'陳世明',
+    31:'鄭又誠'
+  }
+};
+
+</script>
+<script>
+(function(){
+'use strict';
+const $ = s => document.querySelector(s);
+const el = (t,c,x)=>{const n=document.createElement(t); if(c)n.className=c; if(x!=null)n.textContent=x; return n;};
+const pad = n => String(n).padStart(2,'0');
+const WD = ['日','一','二','三','四','五','六'];
+
+const mem={};
+const store={
+  get(k){ try{return localStorage.getItem(k);}catch(e){return mem[k]||null;} },
+  set(k,v){ try{localStorage.setItem(k,v);}catch(e){mem[k]=v;} }
+};
+
+let D = JSON.parse(JSON.stringify(MONTH_DATA));
+
+/* 外部載入的班表要長得像班表才採用，避免空檔或壞檔把整個畫面弄掛 */
+function looksLikeSchedule(j){
+  return !!j && typeof j === 'object'
+    && j.meta && typeof j.meta.month === 'string'
+    && Array.isArray(j.dutyRoster) && j.dutyRoster.length > 0
+    && j.duty  && typeof j.duty  === 'object'
+    && j.codes && typeof j.codes === 'object';
+}
+let meName = null;
+let viewDay = null;                       // 1..31
+
+/* 月份相關的值必須在載入 schedule.json 之後才確定，
+   否則發布下個月的班表時，畫面仍會沿用內建那個月的天數與星期。 */
+let Y, M, daysInMonth;
+function applyMonth(){
+  const m = (D.meta && D.meta.month) || '2026-08';
+  [Y, M] = m.split('-').map(Number);
+  daysInMonth = new Date(Y, M, 0).getDate();
+}
+applyMonth();
+const dowOf = d => new Date(Y, M-1, d).getDay();
+const isOff = d => { const w = dowOf(d); return w===0||w===6; };
+const dateStr = d => `${Y}-${pad(M)}-${pad(d)}`;
+
+/* 名冊查詢 */
+function findDoc(name){
+  return D.dutyRoster.find(x=>x.name===name)
+      || D.consultRoster.find(x=>x.name===name)
+      || (D.halfMonth||[]).find(x=>x.name===name)
+      || null;
+}
+const codeInfo = c => D.codes[c] || { label:c, note:'代碼未定義', kind:'unknown', color:'#64748b' };
+const isChief = n => (D.chiefs||[]).includes(n);
+
+/* 取某日某代碼的人 */
+function whoHas(day, code){
+  const m = D.duty[day]||{};
+  return Object.keys(m).filter(n=>m[n]===code);
+}
+function myCode(day){
+  if(!meName) return null;
+  const c = (D.duty[day]||{})[meName];
+  return (c && !ignored(c)) ? c : null;
+}
+/* 某代碼在本月出現的天數比例，用來判斷「這天沒有」是缺漏還是本來就沒有 */
+function coverage(code){
+  let n = 0;
+  for(let d=1; d<=daysInMonth; d++) if(whoHas(d, code).length) n++;
+  return n / daysInMonth;
+}
+const kindOf = c => codeInfo(c).kind;
+/* 依科內指示忽略的原表標記（*、X），一律不顯示 */
+const ignored = c => kindOf(c)==='ignore';
+/* 當日的內科班（總值班 A1/A2、加護病房 S/U）→ [[姓名, 代碼], …] */
+function gsmOf(day){
+  const m = D.duty[day]||{};
+  return Object.keys(m).filter(n=>kindOf(m[n])==='gsm').sort((a,b)=>m[a]<m[b]?-1:1).map(n=>[n,m[n]]);
+}
+
+/* ---------- 開機 ---------- */
+async function boot(){
+  let src = '內建 8 月資料';
+  if(location.protocol==='http:'||location.protocol==='https:'){
+    try{
+      const r = await fetch('schedule.json?t='+Date.now(),{cache:'no-store'});
+      if(r.ok){
+        const j = await r.json();
+        // 線上檔可能是空的或壞的（離線、上傳到一半），驗過結構再採用
+        if(looksLikeSchedule(j)){ D = j; src='schedule.json（線上共用檔）'; }
+        else src='內建資料（線上檔案格式不符，已忽略）';
+      }
+    }catch(e){}
+  }
+  const draft = store.get('cv-sched');
+  if(draft){
+    try{ const j = JSON.parse(draft); if(looksLikeSchedule(j)){ D = j; src='本機修改版'; } }catch(e){}
+  }
+  applyMonth();                              // 依實際載入的資料重算月份
+  meName = store.get('cv-me') || null;
+  const th = store.get('cv-theme'); if(th) document.documentElement.dataset.theme = th;
+
+  const today = new Date();
+  viewDay = (today.getFullYear()===Y && today.getMonth()+1===M)
+    ? today.getDate() : 1;
+  $('#srcInfo').textContent = '資料來源：'+src;
+  renderAll();
+}
+function save(){ store.set('cv-sched', JSON.stringify(D)); }
+
+/* ---------- 今天 ---------- */
+function renderToday(){
+  const d = viewDay;
+  $('#dBig').textContent = `${M} 月 ${d} 日`;
+  const t = new Date();
+  const isToday = t.getFullYear()===Y && t.getMonth()+1===M && t.getDate()===d;
+  $('#dSub').textContent = `星期${WD[dowOf(d)]}${isOff(d)?'（假日）':''}${isToday?'　·　今天':''}`;
+
+  /* Hero：我的班 */
+  const hb = $('#heroBox'); hb.innerHTML='';
+  const mine = myCode(d);
+  const hero = el('div','hero'+(mine?' on':''));
+  if(!meName){
+    hero.appendChild(el('div','lbl','請先在上方選擇你是誰'));
+    hero.appendChild(el('div','val','—'));
+  }else if(mine){
+    const ci = codeInfo(mine);
+    hero.appendChild(el('div','lbl', meName + '　這天的班'));
+    hero.appendChild(el('div','val', ci.label));
+    if(ci.note) hero.appendChild(el('div','lbl', ci.note));
+  }else{
+    hero.appendChild(el('div','lbl', meName + '　這天的班'));
+    hero.appendChild(el('div','val','沒有班'));
+  }
+  hb.appendChild(hero);
+
+  /* 值班 A/B/C */
+  const db = $('#dutyBox'); db.innerHTML='';
+  for(const code of ['A','B','C']){
+    const ci = codeInfo(code);
+    const names = whoHas(d, code);
+    const row = el('div','slot');
+    const tag = el('span','tag', ci.label); tag.style.background = ci.color; row.appendChild(tag);
+    const box = el('div');
+    if(names.length){
+      names.forEach(n=>{
+        const line = el('div','row'); line.style.gap='6px';
+        const w = el('span','who', n); line.appendChild(w);
+        if(n===meName) line.appendChild(el('span','me-badge','我'));
+        if(isChief(n)) line.appendChild(el('span','muted','總醫師'));
+        box.appendChild(line);
+        const doc = findDoc(n);
+        if(doc) box.appendChild(el('div','ids', `代號 ${doc.code}　GSM ${doc.gsm}`));
+      });
+    }else{
+      // 只有「幾乎每天都該有」的班別（如 A、C）缺漏時才示警；
+      // B 班本來就不是每天有，缺了就單純顯示「無」，避免誤報。
+      const unverified = D.meta.verified && D.meta.verified.duty===false;
+      const daily = coverage(code) >= 0.9;
+      box.appendChild(el('div','who none', (unverified && daily) ? '未填 — 請到「更新資料」確認' : '無'));
+    }
+    row.appendChild(box);
+    db.appendChild(row);
+  }
+  /* 內科班：總值班 A1/A2 與加護病房 S/U */
+  const gsmNames = gsmOf(d);
+  if(gsmNames.length){
+    const h = el('div'); h.appendChild(el('h3',null,'內科班（總值班／加護病房）'));
+    gsmNames.forEach(([n,c])=>{
+      const row = el('div','slot');
+      const ci = codeInfo(c);
+      const tag = el('span','tag', c); tag.style.background = ci.color; row.appendChild(tag);
+      const b = el('div');
+      const line = el('div','row'); line.style.gap='6px';
+      line.appendChild(el('span','who', n));
+      if(n===meName) line.appendChild(el('span','me-badge','我'));
+      b.appendChild(line);
+      const doc = findDoc(n); if(doc) b.appendChild(el('div','ids',`代號 ${doc.code}　GSM ${doc.gsm}`));
+      row.appendChild(b); h.appendChild(row);
+    });
+    db.appendChild(h);
+  }
+
+  /* 白天會診 */
+  const cb = $('#consultBox'); cb.innerHTML='';
+  const cName = D.consult[d];
+  if(isOff(d)){
+    cb.appendChild(el('div','who none','假日無白天普通會診'));
+  }else if(cName){
+    const line = el('div','row'); line.style.gap='6px';
+    line.appendChild(el('span','who', cName));
+    if(cName===meName) line.appendChild(el('span','me-badge','我'));
+    cb.appendChild(line);
+    const doc = findDoc(cName);
+    if(doc){
+      cb.appendChild(el('div','ids', `醫師代號 ${doc.code}　GSM ${doc.gsm}`));
+      if(doc.avail) cb.appendChild(el('div','muted', '可排：'+doc.avail));
+    }
+  }else{
+    cb.appendChild(el('div','who none','未排'));
+  }
+  /* 半月輪值 */
+  (D.halfMonth||[]).forEach(h=>{
+    const [a,b] = h.range.split('-').map(Number);
+    if(d>=a && d<=b){
+      const note = (h.marks||{})[d];
+      cb.appendChild(el('div','muted', `本半月（${h.range} 日）：${h.name}${note?'　—　'+note:''}`));
+    }
+  });
+
+  /* 其他班別 */
+  const ob = $('#otherBox'); ob.innerHTML='';
+  const day = D.duty[d]||{};
+  const rest = Object.keys(day).filter(n=>{
+    const k = kindOf(day[n]);
+    return k!=='duty' && k!=='gsm' && k!=='ignore';
+  });
+  if(!rest.length) ob.appendChild(el('div','who none','無'));
+  rest.sort((a,b)=>day[a]<day[b]?-1:1).forEach(n=>{
+    const ci = codeInfo(day[n]);
+    const row = el('div','slot');
+    const tag = el('span','tag', ci.label); tag.style.background = ci.color; row.appendChild(tag);
+    const b = el('div');
+    const line = el('div','row'); line.style.gap='6px';
+    line.appendChild(el('span',null, n));
+    if(n===meName) line.appendChild(el('span','me-badge','我'));
+    b.appendChild(line);
+    row.appendChild(b);
+    ob.appendChild(row);
+  });
+}
+
+/* ---------- 我的班 ---------- */
+function renderMine(){
+  const box = $('#mineBox'); box.innerHTML='';
+  if(!meName){
+    const c = el('div','card'); c.appendChild(el('p','muted','請先到「今天」頁選擇你是誰。')); box.appendChild(c);
+    return;
+  }
+  const rows=[];
+  for(let d=1; d<=daysInMonth; d++){
+    const c = myCode(d);                       // myCode 已過濾掉忽略的標記
+    const isC = D.consult[d]===meName;
+    if(c||isC) rows.push({d, code:c, consult:isC});
+  }
+  const dutyCount = rows.filter(r=>r.code && ['A','B','C'].includes(r.code)).length;
+  const offCount  = rows.filter(r=>r.code && ['A','B','C'].includes(r.code) && isOff(r.d)).length;
+  const consCount = rows.filter(r=>r.consult).length;
+  const today = new Date();
+  const todayD = (today.getFullYear()===Y && today.getMonth()+1===M) ? today.getDate() : 0;
+  const next = rows.find(r=>r.d>=todayD);
+
+  const sum = el('div','card');
+  sum.appendChild(el('h2',null, `${Y} 年 ${M} 月　${meName}`));
+  const doc = findDoc(meName);
+  if(doc) sum.appendChild(el('div','ids', `醫師代號 ${doc.code}　GSM ${doc.gsm}`));
+  const g = el('div'); g.style.marginTop='10px';
+  const st=(l,v)=>{const s=el('span','stat'); s.appendChild(el('b',null,String(v))); s.appendChild(el('span','muted',l)); return s;};
+  g.appendChild(st('值班(A/B/C)', dutyCount));
+  g.appendChild(st('其中假日', offCount));
+  g.appendChild(st('白天會診', consCount));
+  g.appendChild(st('下次', next? `${M}/${next.d}` : '—'));
+  sum.appendChild(g);
+  box.appendChild(sum);
+
+  const c2 = el('div','card');
+  c2.appendChild(el('h2',null,'我這個月的班'));
+  if(!rows.length){ c2.appendChild(el('p','muted','這個月沒有排到班。')); }
+  else{
+    const t = el('table');
+    const hr = t.insertRow();
+    ['日期','星期','班別'].forEach(h=>{const th=document.createElement('th');th.textContent=h;hr.appendChild(th);});
+    rows.forEach(r=>{
+      const tr = t.insertRow();
+      if(isOff(r.d)) tr.className='off';
+      if(r.d===todayD) tr.style.fontWeight='700';
+      tr.insertCell().textContent = `${M}/${r.d}`;
+      tr.insertCell().textContent = WD[dowOf(r.d)];
+      const c = tr.insertCell();
+      if(r.code){ const ci=codeInfo(r.code); const s=el('span','chip',ci.label); s.style.background=ci.color; c.appendChild(s); }
+      if(r.consult){ const s=el('span','chip','白天會診'); s.style.background='#0f766e'; c.appendChild(s); }
+      tr.onclick = ()=>{ viewDay=r.d; switchTab('today'); renderAll(); };
+      tr.style.cursor='pointer';
+    });
+    c2.appendChild(t);
+  }
+  box.appendChild(c2);
+}
+
+/* ---------- 全月 ---------- */
+function renderAllMonth(){
+  const t = $('#abcTbl'); t.innerHTML='';
+  const hr = t.insertRow();
+  ['日','週','A班','B班','C班','內科班'].forEach(h=>{const th=document.createElement('th');th.textContent=h;hr.appendChild(th);});
+  const today = new Date();
+  const todayD = (today.getFullYear()===Y && today.getMonth()+1===M)? today.getDate():0;
+  for(let d=1; d<=daysInMonth; d++){
+    const tr = t.insertRow();
+    if(isOff(d)) tr.className='off';
+    if(meName && (D.duty[d]||{})[meName]) tr.classList.add('me');
+    if(d===todayD) tr.style.fontWeight='700';
+    tr.insertCell().textContent = d;
+    tr.insertCell().textContent = WD[dowOf(d)];
+    ['A','B','C'].forEach(code=>{
+      const names = whoHas(d, code);
+      const c = tr.insertCell();
+      c.textContent = names.join('、') || '—';
+      if(!names.length && coverage(code)>=0.9) c.style.color='var(--danger)';
+      if(names.includes(meName)) c.style.fontWeight='700';
+    });
+    tr.insertCell().textContent = gsmOf(d).map(([n,c])=>`${n}(${c})`).join('、') || '—';
+    tr.style.cursor='pointer';
+    tr.onclick = ()=>{ viewDay=d; switchTab('today'); renderAll(); };
+  }
+
+  const t2 = $('#consultTbl'); t2.innerHTML='';
+  const hr2 = t2.insertRow();
+  ['日','週','會診醫師','醫師代號','GSM'].forEach(h=>{const th=document.createElement('th');th.textContent=h;hr2.appendChild(th);});
+  for(let d=1; d<=daysInMonth; d++){
+    if(isOff(d)) continue;
+    const tr = t2.insertRow();
+    if(meName && D.consult[d]===meName) tr.className='me';
+    if(d===todayD) tr.style.fontWeight='700';
+    tr.insertCell().textContent = d;
+    tr.insertCell().textContent = WD[dowOf(d)];
+    const n = D.consult[d];
+    const c = tr.insertCell(); c.textContent = n||'—';
+    if(!n) c.style.color='var(--danger)';
+    const doc = n? findDoc(n) : null;
+    const c1=tr.insertCell(); c1.className='mono'; c1.textContent = doc?doc.code:'';
+    const c2=tr.insertCell(); c2.className='mono'; c2.textContent = doc?doc.gsm:'';
+  }
+
+  const cb = $('#codeBox'); cb.innerHTML='';
+  const used = new Set();
+  for(let d=1; d<=daysInMonth; d++) Object.values(D.duty[d]||{}).forEach(c=>used.add(c));
+  [...used].filter(c=>!ignored(c)).sort().forEach(c=>{
+    const ci = codeInfo(c);
+    const row = el('div','slot');
+    const tag = el('span','tag', c); tag.style.background=ci.color; row.appendChild(tag);
+    const b = el('div');
+    b.appendChild(el('div',null, ci.label));
+    b.appendChild(el('div','muted', ci.note));
+    row.appendChild(b);
+    cb.appendChild(row);
+  });
+}
+
+/* ---------- 名冊 ---------- */
+function renderDir(){
+  const q = ($('#dirSearch').value||'').trim().toLowerCase();
+  const hit = r => !q || r.name.toLowerCase().includes(q)
+    || String(r.code).toLowerCase().includes(q) || String(r.gsm).toLowerCase().includes(q);
+
+  const build = (tbl, list, extra) => {
+    tbl.innerHTML='';
+    const hr = tbl.insertRow();
+    const cols = ['','姓名','醫師代號','GSM'].concat(extra?['可排']:[]);
+    cols.forEach(h=>{const th=document.createElement('th');th.textContent=h;hr.appendChild(th);});
+    list.filter(hit).forEach(r=>{
+      const tr = tbl.insertRow();
+      if(r.name===meName) tr.className='me';
+      tr.insertCell().textContent = isChief(r.name)?'★':'';
+      tr.insertCell().textContent = r.name;
+      const c1=tr.insertCell(); c1.className='mono'; c1.textContent=r.code;
+      const c2=tr.insertCell(); c2.className='mono'; c2.textContent=r.gsm;
+      if(extra) tr.insertCell().textContent = r.avail||'';
+      tr.style.cursor='pointer';
+      tr.onclick = ()=>copy(`${r.name}\t${r.code}\t${r.gsm}`, tr);
+    });
+    if(!tbl.rows.length-1) {}
+  };
+  build($('#dirTbl'), D.dutyRoster, false);
+  build($('#dirTbl2'), D.consultRoster, true);
+}
+function copy(text, node){
+  const done = ()=>{ if(node){ const o=node.style.background; node.style.background='var(--ok-soft)';
+    setTimeout(()=>node.style.background=o,600);} };
+  if(navigator.clipboard) navigator.clipboard.writeText(text).then(done).catch(()=>fallback(text,done));
+  else fallback(text, done);
+}
+function fallback(text, cb){
+  const ta = el('textarea'); ta.value=text; document.body.appendChild(ta); ta.select();
+  try{document.execCommand('copy');}catch(e){}
+  ta.remove(); cb&&cb();
+}
+$('#dirSearch').oninput = renderDir;
+$('#btnCopyDuty').onclick = ()=>copy(
+  '姓名\t醫師代號\tGSM\n'+D.dutyRoster.map(r=>`${r.name}\t${r.code}\t${r.gsm}`).join('\n'), $('#btnCopyDuty'));
+$('#btnCopyCons').onclick = ()=>copy(
+  '姓名\t醫師代號\tGSM\t可排\n'+D.consultRoster.map(r=>`${r.name}\t${r.code}\t${r.gsm}\t${r.avail||''}`).join('\n'), $('#btnCopyCons'));
+$('#btnCsvDir').onclick = ()=>{
+  const rows=[['表別','總醫師','姓名','醫師代號','GSM','可排']];
+  D.dutyRoster.forEach(r=>rows.push(['值班表', isChief(r.name)?'★':'', r.name, r.code, r.gsm, '']));
+  D.consultRoster.forEach(r=>rows.push(['會診表','', r.name, r.code, r.gsm, r.avail||'']));
+  download('roster_'+D.meta.month+'.csv',
+    '﻿'+rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\r\n'),'text/csv');
+};
+
+/* ---------- 逐日編輯 ---------- */
+function openEditDay(d){
+  const s = $('#sheet'); s.innerHTML='';
+  s.appendChild(el('h2',null, `${M} 月 ${d} 日（週${WD[dowOf(d)]}）值班內容`));
+  s.appendChild(el('p','muted','留白＝當天沒有班。改完按下方「儲存」。'));
+  const day = Object.assign({}, D.duty[d]||{});
+  const codeList = Object.keys(D.codes).filter(c=>D.codes[c].kind!=='ignore');
+  const inputs = [];
+  D.dutyRoster.forEach(r=>{
+    const row = el('div','slot');
+    const nm = el('span',null, r.name); nm.style.minWidth='72px'; row.appendChild(nm);
+    row.appendChild(el('span','spacer'));
+    const sel = el('select');
+    sel.appendChild(new Option('—',''));
+    codeList.forEach(c=>sel.appendChild(new Option(`${c}　${D.codes[c].label}`, c)));
+    sel.value = day[r.name]||'';
+    inputs.push([r.name, sel]);
+    row.appendChild(sel);
+    s.appendChild(row);
+  });
+  const save1 = el('button','btn','儲存'); save1.style.cssText='width:100%;margin-top:12px';
+  save1.onclick = ()=>{
+    const nd = {};
+    inputs.forEach(([n,sel])=>{ if(sel.value) nd[n]=sel.value; });
+    D.duty[d] = nd; save(); renderAll();
+    $('#modal').classList.remove('on');
+  };
+  s.appendChild(save1);
+  const cl = el('button','btn ghost','取消'); cl.style.cssText='width:100%;margin-top:8px';
+  cl.onclick = ()=>$('#modal').classList.remove('on');
+  s.appendChild(cl);
+  $('#modal').classList.add('on');
+}
+$('#modal').onclick = e => { if(e.target.id==='modal') $('#modal').classList.remove('on'); };
+$('#btnEditDay').onclick = ()=>openEditDay(+$('#editDay').value);
+
+/* ---------- 貼上解析 ---------- */
+const splitCells = l => l.includes('\t') ? l.split('\t') : l.split(/ {2,}|,/);
+
+/* 資料列開頭可能有「日期」「星期」欄，先算出要略過幾格才對到第一位醫師 */
+function leadingCols(cells){
+  let i = 0;
+  while(i < cells.length){
+    const v = String(cells[i]).trim();
+    const asNum = parseInt(v.replace(/[^\d]/g,''),10);
+    const isDay = /^\d+$/.test(v.replace(/[^\d]/g,'')) && asNum>=1 && asNum<=31 && v.length<=4;
+    const isWd  = /^[日一二三四五六]$/.test(v);
+    if(isDay || isWd) i++;
+    else break;
+  }
+  return i;
+}
+
+function parseDutyPaste(text){
+  const lines = text.replace(/\r/g,'').split('\n').filter(l=>l.trim()!=='');
+  if(lines.length < 2) throw new Error('至少需要一列姓名 + 一列資料');
+  const head = splitCells(lines[0]).map(s=>s.trim());
+  const known = new Set(D.dutyRoster.map(r=>r.name));
+
+  // 表頭：略過「日期／星期」之類的標題格，從第一個醫師名開始
+  let headOffset = 0;
+  while(headOffset < head.length && head[headOffset] && !known.has(head[headOffset])) headOffset++;
+  if(headOffset >= head.length) headOffset = 0;          // 一個都認不出來就整列當姓名
+  const names = head.slice(headOffset).map(s=>s.trim());
+  const unknown = names.filter(n=>n && !known.has(n));
+
+  const duty = {};
+  let rows = 0, dataOffset = null;
+  for(let i=1;i<lines.length;i++){
+    const cells = splitCells(lines[i]);
+    const dayNum = parseInt(String(cells[0]).replace(/[^\d]/g,''),10);
+    if(!dayNum || dayNum<1 || dayNum>31) continue;
+    if(dataOffset===null) dataOffset = leadingCols(cells) || 1;
+    const rec = {};
+    for(let k=0;k<names.length;k++){
+      if(!names[k]) continue;
+      const v = (cells[k+dataOffset]||'').trim();
+      if(v && v!=='—' && v!=='-') rec[names[k]] = v;
+    }
+    duty[dayNum] = rec; rows++;
+  }
+  return { duty, rows, names:names.filter(Boolean), unknown, dataOffset };
+}
+function showParse(target, res){
+  const box = $(target); box.innerHTML='';
+  let html = `<div class="note ${res.unknown.length?'warn':'ok'}">解析到 ${res.rows} 天、${res.names.length} 位醫師。`;
+  if(res.unknown.length) html += `<br>⚠️ 名冊中沒有這些姓名：${res.unknown.join('、')}（仍會保留，但名冊查不到代號）`;
+  html += '</div>';
+  const codes = new Set();
+  Object.values(res.duty).forEach(r=>Object.values(r).forEach(c=>codes.add(c)));
+  const undef = [...codes].filter(c=>!D.codes[c]);
+  if(undef.length) html += `<div class="note warn">⚠️ 出現未定義的代碼：${undef.join(' ')}（會照樣顯示）</div>`;
+  const noA = []; const noC = [];
+  for(let d=1;d<=daysInMonth;d++){
+    const r = res.duty[d]; if(!r) continue;
+    if(!Object.values(r).includes('A')) noA.push(d);
+    if(!Object.values(r).includes('C')) noC.push(d);
+  }
+  if(noA.length) html += `<div class="note warn">⚠️ 這些日子沒有 A 班：${noA.join('、')}</div>`;
+  if(noC.length) html += `<div class="note warn">⚠️ 這些日子沒有 C 班：${noC.join('、')}</div>`;
+  box.innerHTML = html;
+}
+$('#btnPreviewDuty').onclick = ()=>{
+  try{ showParse('#parseMsg', parseDutyPaste($('#pasteDuty').value)); }
+  catch(e){ $('#parseMsg').innerHTML = `<div class="note bad">解析失敗：${e.message}</div>`; }
+};
+$('#btnParseDuty').onclick = ()=>{
+  try{
+    const res = parseDutyPaste($('#pasteDuty').value);
+    D.duty = res.duty;
+    D.meta.verified = D.meta.verified||{}; D.meta.verified.duty = true;
+    save(); showParse('#parseMsg', res); renderAll();
+  }catch(e){ $('#parseMsg').innerHTML = `<div class="note bad">解析失敗：${e.message}</div>`; }
+};
+$('#btnParseCons').onclick = ()=>{
+  const text = $('#pasteCons').value.replace(/\r/g,'');
+  const lines = text.split('\n').filter(l=>l.trim()!=='');
+  const known = new Set(D.consultRoster.map(r=>r.name));
+  const cons = {}; let n=0; const unknown=new Set();
+  const split = l => l.includes('\t') ? l.split('\t') : l.trim().split(/\s+|,/);
+  // 格式一：每行「日期 姓名」
+  let simple = true;
+  for(const l of lines){
+    const c = split(l).map(s=>s.trim()).filter(s=>s!=='');
+    if(c.length!==2 || !/^\d+$/.test(c[0].replace(/[^\d]/g,''))){ simple=false; break; }
+  }
+  if(simple){
+    lines.forEach(l=>{
+      const c = split(l).map(s=>s.trim()).filter(s=>s!=='');
+      const d = parseInt(c[0].replace(/[^\d]/g,''),10);
+      if(d>=1&&d<=31){ cons[d]=c[1]; n++; if(!known.has(c[1])) unknown.add(c[1]); }
+    });
+  }else{
+    // 格式二：格線表，第一列姓名，之後每列「日期(+星期) + V」
+    const head = splitCells(lines[0]).map(s=>s.trim());
+    let headOffset = 0;
+    while(headOffset < head.length && head[headOffset] && !known.has(head[headOffset])) headOffset++;
+    if(headOffset >= head.length) headOffset = 0;
+    const names = head.slice(headOffset);
+    let dataOffset = null;
+    for(let i=1;i<lines.length;i++){
+      const cells = splitCells(lines[i]);
+      const d = parseInt(String(cells[0]).replace(/[^\d]/g,''),10);
+      if(!d||d<1||d>31) continue;
+      if(dataOffset===null) dataOffset = leadingCols(cells) || 1;
+      for(let k=0;k<names.length;k++){
+        if(!names[k]) continue;
+        const v = (cells[k+dataOffset]||'').trim();
+        if(v && v!=='—' && v!=='-'){ cons[d]=names[k]; n++; if(!known.has(names[k])) unknown.add(names[k]); break; }
+      }
+    }
+  }
+  let html = `<div class="note ${unknown.size?'warn':'ok'}">解析到 ${n} 天的白天會診。`;
+  if(unknown.size) html += `<br>⚠️ 名冊中沒有：${[...unknown].join('、')}`;
+  html += '</div>';
+  const wk = []; for(let d=1;d<=daysInMonth;d++) if(!isOff(d) && !cons[d]) wk.push(d);
+  if(wk.length) html += `<div class="note warn">⚠️ 這些平日沒有會診醫師：${wk.join('、')}</div>`;
+  $('#parseMsg2').innerHTML = html;
+  if(n){ D.consult = cons; D.meta.verified = D.meta.verified||{}; D.meta.verified.consult = true; save(); renderAll(); }
+};
+
+/* ---------- A/B/C 快速編輯 ---------- */
+let abcSelects = [];
+function renderAbcEditor(){
+  const t = $('#abcEdit'); t.innerHTML=''; abcSelects = [];
+  const hr = t.insertRow();
+  ['日','週','A班','B班','C班'].forEach(h=>{const th=document.createElement('th');th.textContent=h;hr.appendChild(th);});
+  const today = new Date();
+  const todayD = (today.getFullYear()===Y && today.getMonth()+1===M)? today.getDate():0;
+
+  for(let d=1; d<=daysInMonth; d++){
+    const tr = t.insertRow();
+    if(isOff(d)) tr.className='off';
+    if(d===todayD) tr.style.fontWeight='700';
+    tr.insertCell().textContent = d;
+    tr.insertCell().textContent = WD[dowOf(d)];
+    ['A','B','C'].forEach(code=>{
+      const sel = document.createElement('select');
+      sel.style.minWidth='92px'; sel.style.padding='4px 6px';
+      sel.appendChild(new Option('—',''));
+      D.dutyRoster.forEach(r=>sel.appendChild(new Option(r.name, r.name)));
+      sel.value = whoHas(d, code)[0] || '';
+      abcSelects.push({ day:d, code, sel });
+      tr.insertCell().appendChild(sel);
+    });
+  }
+}
+$('#btnSaveAbc').onclick = ()=>{
+  // 先清掉舊的 A/B/C，再依選單寫回；其他代碼（D/E/夜診/休假…）完全不動
+  for(let d=1; d<=daysInMonth; d++){
+    const day = D.duty[d]||{};
+    Object.keys(day).forEach(n=>{ if(['A','B','C'].includes(day[n])) delete day[n]; });
+    D.duty[d] = day;
+  }
+  let n=0; const clash=[];
+  abcSelects.forEach(({day,code,sel})=>{
+    if(!sel.value) return;
+    const cur = D.duty[day][sel.value];
+    if(cur && !['A','B','C'].includes(cur)) clash.push(`${M}/${day} ${sel.value} 原本是「${codeInfo(cur).label}」，已改成 ${code} 班`);
+    D.duty[day][sel.value] = code; n++;
+  });
+  D.meta.verified = D.meta.verified||{}; D.meta.verified.duty = true;
+  save(); renderAll();
+  $('#abcMsg').textContent = `已儲存 ${n} 筆` + (clash.length? `（${clash.length} 筆覆蓋了原有代碼）` : '');
+  if(clash.length) alert(clash.join('\n'));
+};
+
+/* ---------- 核對狀態 ---------- */
+function renderVerify(){
+  const b = $('#verifyBox'); b.innerHTML='';
+  const v = D.meta.verified||{};
+  const item = (key,label,desc)=>{
+    const ok = v[key]===true;
+    const n = el('div','note '+(ok?'ok':'warn'));
+    n.textContent = (ok?'✅ ':'⚠️ ') + label + '：' + (ok?'已核對':'尚未核對') + (desc?'　'+desc:'');
+    const btn = el('button','btn ghost sm', ok?'標記為未核對':'標記為已核對');
+    btn.style.marginTop='6px';
+    btn.onclick = ()=>{ v[key]=!ok; D.meta.verified=v; save(); renderVerify(); renderAll(); };
+    const wrap = el('div'); wrap.appendChild(n); wrap.appendChild(btn); wrap.style.marginBottom='12px';
+    b.appendChild(wrap);
+  };
+  item('roster','醫師名冊（GSM／醫師代號）','來自表頭，清晰可讀');
+  item('consult','白天普通會診表','已用「可排星期」交叉驗證 21 筆全數吻合');
+  item('duty','值班表 A/B/C 班','A 班 31 天全數由使用者確認；如需修改用上方「A/B/C 班快速編輯」');
+
+  const noC=[]; for(let d=1;d<=daysInMonth;d++) if(!whoHas(d,'C').length) noC.push(d);
+  const noA=[]; for(let d=1;d<=daysInMonth;d++) if(!whoHas(d,'A').length) noA.push(d);
+  if(noA.length) b.appendChild(noteEl('bad','這些日子沒有 A 班：'+noA.join('、')));
+  if(noC.length) b.appendChild(noteEl('bad','這些日子沒有 C 班：'+noC.join('、')+'　→ 請用上方「逐日修改」補上'));
+  if(!noA.length && !noC.length) b.appendChild(noteEl('ok','每一天都有 A 班與 C 班。'));
+}
+function noteEl(k,t){ const n=el('div','note '+k); n.textContent=t; return n; }
+
+/* ---------- 匯出 ---------- */
+function download(name, text, mime){
+  const b = new Blob([text],{type:(mime||'text/plain')+';charset=utf-8'});
+  const a = el('a'); a.href=URL.createObjectURL(b); a.download=name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+$('#btnJson').onclick = ()=>download('schedule.json', JSON.stringify(D,null,2), 'application/json');
+$('#btnPrint').onclick = ()=>{ switchTab('all'); setTimeout(()=>window.print(),200); };
+$('#btnIcs').onclick = ()=>{
+  if(!meName) return alert('請先在「今天」頁選擇你是誰。');
+  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//cv-duty//TW','CALSCALE:GREGORIAN'];
+  let n=0;
+  for(let d=1; d<=daysInMonth; d++){
+    const items=[];
+    const c = (D.duty[d]||{})[meName]; if(c) items.push(codeInfo(c).label);
+    if(D.consult[d]===meName) items.push('白天普通會診');
+    if(!items.length) continue;
+    const ds = `${Y}${pad(M)}${pad(d)}`;
+    const nx = new Date(Y, M-1, d+1);
+    const de = `${nx.getFullYear()}${pad(nx.getMonth()+1)}${pad(nx.getDate())}`;
+    lines.push('BEGIN:VEVENT',`UID:${ds}-${n}@cvduty`,
+      `DTSTAMP:${new Date().toISOString().replace(/[-:]/g,'').split('.')[0]}Z`,
+      `DTSTART;VALUE=DATE:${ds}`,`DTEND;VALUE=DATE:${de}`,
+      `SUMMARY:${items.join(' + ')}`,`DESCRIPTION:${(D.meta && D.meta.dept) || '心臟內科'} ${meName}`,
+      'BEGIN:VALARM','TRIGGER:-PT12H','ACTION:DISPLAY',`DESCRIPTION:明天 ${items.join(' + ')}`,'END:VALARM',
+      'END:VEVENT');
+    n++;
+  }
+  lines.push('END:VCALENDAR');
+  if(!n) return alert('這個月沒有你的班。');
+  const idx = D.dutyRoster.findIndex(r=>r.name===meName)+1;
+  download(`shift_${D.meta.month}_dr${idx||0}.ics`, lines.join('\r\n'),'text/calendar');
+};
+$('#btnCopyRaw').onclick = ()=>copy($('#rawCfg').value, $('#btnCopyRaw'));
+$('#btnApplyRaw').onclick = ()=>{
+  try{ const j = JSON.parse($('#rawCfg').value);
+       if(!looksLikeSchedule(j)) return alert('這份資料缺少必要欄位（meta.month／dutyRoster／duty／codes），沒有套用。');
+       D = j; applyMonth(); save(); renderAll(); alert('已套用。'); }
+  catch(e){ alert('格式錯誤：'+e.message); }
+};
+$('#btnReset').onclick = ()=>{
+  if(!confirm('回復成內建的 8 月資料？你目前的修改會消失。')) return;
+  D = JSON.parse(JSON.stringify(MONTH_DATA)); applyMonth(); save(); renderAll();
+};
+
+/* ---------- 導覽 ---------- */
+function switchTab(p){
+  document.querySelectorAll('nav button').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.p===p)));
+  document.querySelectorAll('.panel').forEach(s=>s.classList.toggle('on', s.id==='p-'+p));
+  window.scrollTo(0,0);
+}
+$('#tabs').onclick = e => { const b=e.target.closest('button'); if(b) switchTab(b.dataset.p); };
+$('#btnTheme').onclick = ()=>{
+  const t = document.documentElement.dataset.theme==='dark'?'':'dark';
+  document.documentElement.dataset.theme=t; store.set('cv-theme',t);
+};
+$('#dPrev').onclick = ()=>{ if(viewDay>1){viewDay--; renderAll();} };
+$('#dNext').onclick = ()=>{ if(viewDay<daysInMonth){viewDay++; renderAll();} };
+$('#dToday').onclick = ()=>{
+  const t=new Date();
+  viewDay = (t.getFullYear()===Y && t.getMonth()+1===M)? t.getDate():1;
+  renderAll();
+};
+$('#me').onchange = e => { meName = e.target.value||null; store.set('cv-me', meName||''); renderAll(); };
+
+/* ---------- 總繪製 ---------- */
+function renderAll(){
+  $('#hdTitle').textContent = `${(D.meta && D.meta.dept) || '心臟內科'}　${Y} 年 ${M} 月`;
+
+  const sel = $('#me'); const cur = meName||'';
+  sel.innerHTML=''; sel.appendChild(new Option('— 請選擇 —',''));
+  const seen = new Set();
+  D.dutyRoster.concat(D.consultRoster).forEach(r=>{
+    if(seen.has(r.name)) return; seen.add(r.name);
+    sel.appendChild(new Option(r.name + (isChief(r.name)?'（總醫師）':''), r.name));
+  });
+  sel.value = cur;
+
+  const ed = $('#editDay'); const curD = ed.value;
+  ed.innerHTML='';
+  for(let d=1; d<=daysInMonth; d++) ed.appendChild(new Option(`${M} 月 ${d} 日（週${WD[dowOf(d)]}）`, d));
+  ed.value = curD || viewDay;
+
+  renderToday();
+  renderMine();
+  renderAllMonth();
+  renderDir();
+  renderAbcEditor();
+  renderVerify();
+  $('#rawCfg').value = JSON.stringify(D,null,2);
+}
+
+/* ================= PWA：安裝與離線 ================= */
+const isStandalone = () =>
+  window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent)
+  || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+let deferredPrompt = null;
+function showBanner(text, actionLabel, onAction){
+  $('#bannerText').textContent = text;
+  const btn = $('#bannerAct');
+  btn.textContent = actionLabel;
+  btn.onclick = onAction;
+  $('#banner').classList.add('on');
+}
+$('#bannerClose').onclick = ()=>$('#banner').classList.remove('on');
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  renderInstall();
+  if(store.get('cv-install-dismissed') !== '1'){
+    showBanner('把班表裝成 App，開啟更快也能離線看', '安裝', async ()=>{
+      $('#banner').classList.remove('on');
+      store.set('cv-install-dismissed','1');
+      await doInstall();
+    });
+  }
+});
+window.addEventListener('appinstalled', ()=>{
+  deferredPrompt = null; store.set('cv-install-dismissed','1');
+  $('#banner').classList.remove('on'); renderInstall();
+});
+async function doInstall(){
+  if(!deferredPrompt) return false;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  deferredPrompt = null; renderInstall();
+  return outcome === 'accepted';
+}
+
+function renderInstall(){
+  const box = $('#installBox'); if(!box) return;
+  box.innerHTML = '';
+  const p = t => box.appendChild(el('p','muted', t));
+
+  if(isStandalone()){
+    box.appendChild(noteEl('ok','已經以 App 模式執行中，離線也能查看班表。'));
+    return;
+  }
+  if(location.protocol === 'file:'){
+    box.appendChild(noteEl('warn','目前是直接開啟本機檔案，無法安裝。把整包檔案放上 GitHub Pages（https）之後就能裝成 App。'));
+    return;
+  }
+  if(deferredPrompt){
+    const b = el('button','btn','立即安裝');
+    b.onclick = ()=>doInstall();
+    box.appendChild(b);
+    p('安裝後會出現在桌面／應用程式清單，開啟時沒有網址列，離線也能看班表。');
+    return;
+  }
+  if(isIOS()){
+    p('iPhone／iPad 請用 Safari 開啟這個網址，然後：');
+    const ol = el('ol'); ol.className='muted';
+    ol.style.cssText='margin:6px 0;padding-left:20px;line-height:1.9';
+    ['點下方中間的「分享」按鈕','往下捲，選「加入主畫面」','按右上角「新增」']
+      .forEach(t=>ol.appendChild(el('li',null,t)));
+    box.appendChild(ol);
+    p('完成後桌面會出現心電圖圖示，點開就是全螢幕的 App。');
+    return;
+  }
+  p('Android／電腦版 Chrome：點網址列右側的「安裝」圖示，或從瀏覽器選單選「安裝應用程式」。');
+  p('若沒看到安裝選項，請確認網址是 https 開頭，並重新整理一次。');
+}
+
+function offerUpdate(reg){
+  showBanner('班表 App 有新版本', '更新', ()=>{
+    $('#banner').classList.remove('on');
+    if(reg.waiting) reg.waiting.postMessage('SKIP_WAITING');
+  });
+}
+
+if('serviceWorker' in navigator && location.protocol.startsWith('http')){
+  window.addEventListener('load', async ()=>{
+    try{
+      const reg = await navigator.serviceWorker.register('sw.js');
+      if(reg.waiting) offerUpdate(reg);
+      reg.addEventListener('updatefound', ()=>{
+        const nw = reg.installing; if(!nw) return;
+        nw.addEventListener('statechange', ()=>{
+          if(nw.state === 'installed' && navigator.serviceWorker.controller) offerUpdate(reg);
+        });
+      });
+      reg.update().catch(()=>{});
+    }catch(e){ /* 註冊失敗不影響一般使用 */ }
+  });
+  let reloading = false;
+  navigator.serviceWorker.addEventListener('controllerchange', ()=>{
+    if(reloading) return; reloading = true; location.reload();
+  });
+}
+
+/* 桌面捷徑帶入的 ?tab= 參數 */
+(function(){
+  const t = new URLSearchParams(location.search).get('tab');
+  if(t && document.getElementById('p-'+t)) switchTab(t);
+})();
+
+boot().then(renderInstall);
+})();
+</script>
+</body>
+</html>

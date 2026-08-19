@@ -1,0 +1,27 @@
+{
+  "name": "心臟內科班表",
+  "short_name": "心內班表",
+  "description": "查詢每日 A/B/C 值班、白天普通會診，以及全科醫師代號與 GSM。",
+  "lang": "zh-Hant",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f6f8fa",
+  "theme_color": "#0e7490",
+  "categories": ["medical", "productivity", "utilities"],
+  "icons": [
+    { "src": "icon-192.png",          "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png",          "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "今天的班", "short_name": "今天", "url": "./?tab=today",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
+    { "name": "我的班表", "short_name": "我的班", "url": "./?tab=mine",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
+    { "name": "醫師名冊", "short_name": "名冊", "url": "./?tab=dir",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] }
+  ]
+}
