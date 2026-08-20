@@ -48,6 +48,20 @@ main{padding:14px;max-width:900px;margin:0 auto;padding-bottom:calc(env(safe-are
 h2{font-size:15px;margin:0 0 10px;font-weight:700}
 h3{font-size:12px;margin:16px 0 6px;font-weight:700;color:var(--muted);letter-spacing:.06em}
 .muted{color:var(--muted);font-size:13px}
+/* ---- 工具頁 ---- */
+.tool-sub{font-size:13px;color:var(--muted);margin:-4px 0 12px}
+ol.crit{margin:0;padding-left:1.5em}
+ol.crit li{margin:0 0 8px;line-height:1.5}
+ol.crit li:last-child{margin-bottom:0}
+details.crit-d{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
+details.crit-d>summary{cursor:pointer;font-size:13px;color:var(--brand);font-weight:600;
+  list-style:none;padding:2px 0}
+details.crit-d>summary::-webkit-details-marker{display:none}
+details.crit-d>summary::before{content:"▸ ";display:inline-block;transition:transform .15s}
+details.crit-d[open]>summary::before{content:"▾ "}
+details.crit-d dl{margin:8px 0 0;font-size:13px}
+details.crit-d dt{font-weight:600;margin-top:8px}
+details.crit-d dd{margin:2px 0 0;color:var(--muted)}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .spacer{flex:1}
 button.btn{background:var(--brand);color:var(--brand-ink);border:0;border-radius:9px;padding:9px 14px;
@@ -138,6 +152,7 @@ tr.off td:first-child{color:var(--danger)}
     <button data-p="mine"  aria-selected="false">行事曆</button>
     <button data-p="all"   aria-selected="false">全月</button>
     <button data-p="dir"   aria-selected="false">通訊錄</button>
+    <button data-p="tools" aria-selected="false">工具</button>
     <button data-p="io"    aria-selected="false">更新資料</button>
   </nav>
 </header>
@@ -215,6 +230,16 @@ tr.off td:first-child{color:var(--danger)}
         <button class="btn ghost sm" id="btnCsvDir">下載 CSV</button>
       </div>
     </div>
+  </section>
+
+  <!-- ============ 工具 ============ -->
+  <section class="panel" id="p-tools">
+    <div class="card">
+      <h2>臨床工具</h2>
+      <p class="muted" style="margin-top:0">術前心血管風險評估用的條目備忘，點按鈕切換。</p>
+      <div class="row" id="toolBtns"></div>
+    </div>
+    <div id="toolBox"></div>
   </section>
 
   <!-- ============ 更新資料 ============ -->
@@ -1343,6 +1368,84 @@ $('#dToday').onclick = ()=>{
 };
 $('#me').onchange = e => { meName = e.target.value||null; store.set('cv-me', meName||''); renderAll(); };
 
+/* ================= 工具頁 =================
+   純條目備忘，不計分、不列風險百分比（依科內指示）。
+   要再加工具時，往 TOOLS 陣列裡多推一個物件就好，按鈕與內容都會自動生出來。 */
+const TOOLS = [
+  {
+    id:'rcri',
+    btn:'RCRI',
+    title:'Revised Goldman cardiac risk index (RCRI)',
+    sub:'術前心臟風險評估，六項各計 1 分。',
+    items:[
+      'High-risk type of surgery',
+      'History of ischemic heart disease',
+      'History of HF',
+      'History of cerebrovascular disease',
+      'Diabetes mellitus requiring treatment with insulin',
+      'Preoperative serum creatinine &gt;2.0 mg/dL'
+    ],
+    detail:[
+      ['High-risk type of surgery',
+       'Intraperitoneal、intrathoracic 或 suprainguinal vascular surgery'],
+      ['History of ischemic heart disease',
+       'Prior MI、positive exercise test、current chest pain considered due to myocardial ischemia、nitrate therapy，或 ECG 出現 pathological Q waves'],
+      ['History of HF',
+       'Pulmonary edema、paroxysmal nocturnal dyspnea、bilateral rales 或 S3 gallop，或 CXR 出現 pulmonary vascular redistribution'],
+      ['History of cerebrovascular disease',
+       'Prior TIA 或 stroke']
+    ]
+  },
+  {
+    id:'aubhas2',
+    btn:'AUB-HAS2',
+    title:'American University of Beirut (AUB)-HAS2 Cardiovascular Risk Index',
+    sub:'術前心血管風險評估，六項各計 1 分。',
+    items:[
+      'Age &ge; 75 years old',
+      'Anemia (Hb &lt; 12 g/dL)',
+      'History of heart disease',
+      'Symptoms of heart disease',
+      'Vascular surgery',
+      'Emergency surgery'
+    ],
+    detail:[
+      ['History of heart disease',
+       'Prior MI、coronary angioplasty／PCI、cardiac surgery、heart failure、atrial fibrillation，或心超證實的 moderate／severe valvular disease'],
+      ['Symptoms of heart disease',
+       'Angina 或 dyspnea']
+    ]
+  }
+];
+let toolSel = null;
+
+function renderTools(){
+  const bar = $('#toolBtns'); bar.innerHTML='';
+  TOOLS.forEach(t=>{
+    const b = document.createElement('button');
+    b.className = 'btn' + (toolSel===t.id ? '' : ' ghost');
+    b.textContent = t.btn;
+    b.onclick = ()=>{ toolSel = (toolSel===t.id ? null : t.id); renderTools(); };
+    bar.appendChild(b);
+  });
+
+  const box = $('#toolBox'); box.innerHTML='';
+  const t = TOOLS.find(x=>x.id===toolSel);
+  if(!t) return;
+
+  const card = el('div','card');
+  card.innerHTML =
+    '<h2>'+t.title+'</h2>' +
+    '<p class="tool-sub">'+t.sub+'</p>' +
+    '<ol class="crit">'+ t.items.map(s=>'<li>'+s+'</li>').join('') +'</ol>' +
+    (t.detail && t.detail.length
+      ? '<details class="crit-d"><summary>各項判定細節</summary><dl>' +
+        t.detail.map(d=>'<dt>'+d[0]+'</dt><dd>'+d[1]+'</dd>').join('') +
+        '</dl></details>'
+      : '');
+  box.appendChild(card);
+}
+
 /* ---------- 總繪製 ---------- */
 function renderAll(){
   $('#hdTitle').textContent = `${(D.meta && D.meta.dept) || '心臟內科'}　${Y} 年 ${M} 月`;
@@ -1365,6 +1468,7 @@ function renderAll(){
   renderMine();
   renderAllMonth();
   renderDir();
+  renderTools();
   renderAbcEditor();
   renderVerify();
   $('#rawCfg').value = JSON.stringify(D,null,2);
